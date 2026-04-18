@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="CareerSimulator.Domain/CareerSimulator.Domain.csproj" />
+  <Project Path="CareerSimulator.UI/CareerSimulator.UI.csproj" />
+</Solution>

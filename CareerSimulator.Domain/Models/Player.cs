@@ -33,7 +33,7 @@
         {
             if (Energy - amount < 0)
             {
-                throw new Exception("Недостатньо енергії для цієї дії!");
+                throw new Domain.Exceptions.NotEnoughEnergyException($"Недостатньо енергії! Потрібно {amount}, а є {Energy}.");
             }
             Energy -= amount;
         }

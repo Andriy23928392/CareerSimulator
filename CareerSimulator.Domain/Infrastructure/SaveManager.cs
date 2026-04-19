@@ -15,6 +15,10 @@ namespace CareerSimulator.Domain.Infrastructure
         public int OverallRating { get; set; }
         public int CurrentWeek { get; set; }
         public int BootsLevel { get; set; }
+        public string ClubName { get; set; } = string.Empty;
+        public decimal ClubSalary { get; set; }
+        public DateTime CurrentDate { get; set; }
+        public int Age { get; set; }
     }
 
     public static class SaveManager
@@ -27,42 +31,37 @@ namespace CareerSimulator.Domain.Infrastructure
             {
                 PlayerName = player.Name,
                 PlayerPosition = player.PlayerPosition,
+                Age = player.Age,
                 Energy = player.Energy,
                 Money = player.Money,
                 OverallRating = player.OverallRating,
                 CurrentWeek = timeManager.CurrentWeek,
-                BootsLevel = player.BootsLevel
+                BootsLevel = player.BootsLevel,
+                CurrentDate = timeManager.CurrentDate,
+                ClubName = player.CurrentClub.Name,
+                ClubSalary = player.CurrentClub.WeeklySalary
             };
 
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
-
             File.WriteAllText(SaveFilePath, json);
 
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\n[Гру успішно збережено у файл savegame.json!]");
-            Console.ResetColor();
+            Console.WriteLine("\n[Гру успішно збережено!]");
         }
 
         public static (Player, TimeManager) LoadGame()
         {
-            if (!File.Exists(SaveFilePath))
-            {
-                throw new FileNotFoundException("Файл збереження не знайдено!");
-            }
+            if (!File.Exists(SaveFilePath)) throw new FileNotFoundException("Файл не знайдено!");
 
             string json = File.ReadAllText(SaveFilePath);
             var state = JsonSerializer.Deserialize<GameState>(json);
 
+            if (state == null) throw new Exception("Помилка даних!");
+
             Player loadedPlayer = new Player(state.PlayerName, state.PlayerPosition);
-            loadedPlayer.LoadState(state.Energy, state.Money, state.OverallRating);
+            loadedPlayer.LoadState(state.Age, state.Energy, state.Money, state.OverallRating, state.BootsLevel, state.ClubName, state.ClubSalary);
 
             TimeManager loadedTime = new TimeManager(loadedPlayer);
-            loadedTime.SetWeek(state.CurrentWeek);
-            loadedPlayer.LoadState(state.Energy, state.Money, state.OverallRating, state.BootsLevel);
-
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("\n[Гру успішно завантажено!]");
-            Console.ResetColor();
+            loadedTime.SetDate(state.CurrentDate);
 
             return (loadedPlayer, loadedTime);
         }

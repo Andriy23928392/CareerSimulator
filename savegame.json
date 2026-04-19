@@ -1,9 +1,13 @@
 {
-  "PlayerName": "\u0000\u0000\u0000\u0000\u0000\u0000",
+  "PlayerName": "\u0000\u0000\u0000\u0000",
   "PlayerPosition": 1,
-  "Energy": 0,
-  "Money": 856,
-  "OverallRating": 48,
-  "CurrentWeek": 35,
-  "BootsLevel": 2
+  "Energy": 60,
+  "Money": 2086,
+  "OverallRating": 52,
+  "CurrentWeek": 103,
+  "BootsLevel": 0,
+  "ClubName": "\u041D\u0438\u0432\u0430 (\u0422\u0435\u0440\u043D\u043E\u043F\u0456\u043B\u044C)",
+  "ClubSalary": 50,
+  "CurrentDate": "2027-08-16T00:00:00",
+  "Age": 19
 }

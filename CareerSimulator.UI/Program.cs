@@ -55,9 +55,9 @@ namespace CareerSimulator.UI
             while (isRunning)
             {
                 Console.WriteLine("\n==============================");
-                Console.WriteLine($"Статус гравця: {myPlayer.Name}");
+                Console.WriteLine($"Статус гравця: {myPlayer.Name} ({myPlayer.Age} років) | Клуб: {myPlayer.CurrentClub.Name}");
                 Console.WriteLine($"Енергія: {myPlayer.Energy} | Гроші: {myPlayer.Money}$ | Рейтинг: {myPlayer.OverallRating}");
-                Console.WriteLine($"Поточний тиждень: {gameTime.CurrentWeek}");
+                Console.WriteLine($"Дата: {gameTime.CurrentDate.ToString("dd.MM.yyyy")}");
                 Console.WriteLine("==============================");
 
                 Console.WriteLine("Оберіть дію:");
@@ -65,6 +65,7 @@ namespace CareerSimulator.UI
                 Console.WriteLine($"2. {rest.Name} (Відновлює енергію)");
                 Console.WriteLine($"3. {match.Name} (-40 енергії)");
                 Console.WriteLine("4. Відвідати магазин");
+                Console.WriteLine("5. Просимулювати РІК");
                 Console.WriteLine("8. ЗБЕРЕГТИ ГРУ");
                 Console.WriteLine("0. Вийти з гри");
                 Console.Write("Ваш вибір: ");
@@ -84,6 +85,9 @@ namespace CareerSimulator.UI
                         break;
                     case "4":
                         OpenStore(myPlayer); 
+                        break;
+                    case "5":
+                        gameTime.SimulateYear();
                         break;
                     case "8":
                         CareerSimulator.Domain.Infrastructure.SaveManager.SaveGame(myPlayer, gameTime);

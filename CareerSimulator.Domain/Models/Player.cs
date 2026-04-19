@@ -14,20 +14,21 @@
         public Position PlayerPosition { get; private set; }
 
         public int Energy { get; private set; }
+        public Club CurrentClub { get; private set; }
         public decimal Money { get; private set; }
         public int BootsLevel { get; private set; } = 0;
-
         public int OverallRating { get; private set; }
+        public int Age { get; private set; }
 
         public Player(string name, Position position)
         {
             Name = name;
             PlayerPosition = position;
-
-
             Energy = 100;
             Money = 500m;
             OverallRating = 40;
+            Age = 18;
+            CurrentClub = new Club("ФК Збірна Університету", 0m, 10);
         }
 
         public void SpendEnergy(int amount)
@@ -74,12 +75,14 @@
                 Energy = 100;
         }
 
-        public void LoadState(int energy, decimal money, int rating, int bootsLevel)
+        public void LoadState(int age, int energy, decimal money, int rating, int bootsLevel, string clubName, decimal clubSalary)
         {
+            Age = age;
             Energy = energy;
             Money = money;
             OverallRating = rating;
             BootsLevel = bootsLevel;
+            CurrentClub = new Club(clubName, clubSalary, 0);
         }
 
         public void UpgradeBoots()
@@ -90,6 +93,14 @@
         {
             Energy -= amount;
             if (Energy < 0) Energy = 0;
+        }
+        public void SignContract(Club newClub)
+        {
+            CurrentClub = newClub;
+        }
+        public void HaveBirthday()
+        {
+            Age++;
         }
     }
 }

@@ -29,6 +29,8 @@ namespace CareerSimulator.Domain.Core
                 activity.Execute(_player);
 
                 CurrentWeek++;
+
+                CareerSimulator.Domain.Events.EventManager.TriggerRandomEvent(_player);
             }
             catch (Exceptions.NotEnoughEnergyException ex)
             {

@@ -86,5 +86,10 @@
         {
             BootsLevel++;
         }
+        public void DecreaseEnergy(int amount)
+        {
+            Energy -= amount;
+            if (Energy < 0) Energy = 0;
+        }
     }
 }

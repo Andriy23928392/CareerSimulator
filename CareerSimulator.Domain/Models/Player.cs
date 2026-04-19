@@ -42,5 +42,29 @@
         {
             Energy = 100;
         }
+
+        public void EarnMoney(decimal amount)
+        {
+            Money += amount;
+        }
+
+        public void SpendMoney(decimal amount)
+        {
+            if (Money - amount < 0)
+                throw new Exception("Недостатньо грошей!");
+            Money -= amount;
+        }
+
+        public void ChangeRating(int delta)
+        {
+            OverallRating += delta;
+            if (OverallRating < 1) OverallRating = 1;
+        }
+        public void LoadState(int energy, decimal money, int rating)
+        {
+            Energy = energy;
+            Money = money;
+            OverallRating = rating;
+        }
     }
 }

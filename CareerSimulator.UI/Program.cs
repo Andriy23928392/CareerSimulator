@@ -1,8 +1,7 @@
-﻿using CareerSimulator.Domain.Activities;
+﻿using System;
+using CareerSimulator.Domain.Activities;
 using CareerSimulator.Domain.Core;
 using CareerSimulator.Domain.Models;
-using System;
-using System.Numerics;
 
 namespace CareerSimulator.UI
 {
@@ -14,14 +13,42 @@ namespace CareerSimulator.UI
             Console.InputEncoding = System.Text.Encoding.UTF8;
 
             Console.WriteLine("Вітаємо в симуляторі кар'єри футболіста!");
-            Console.Write("Введіть ім'я вашого гравця: ");
-            string playerName = Console.ReadLine();
 
-            Player myPlayer = new Player(playerName, Position.Defender);
-            TimeManager gameTime = new TimeManager(myPlayer);
+            Player? myPlayer = null;
+            TimeManager? gameTime = null;
+
+            Console.WriteLine("1. Почати нову гру");
+            Console.WriteLine("2. Завантажити збереження");
+            Console.Write("Ваш вибір: ");
+
+            string startChoice = Console.ReadLine() ?? "1";
+
+            if (startChoice == "2")
+            {
+                try
+                {
+                    var loadedData = CareerSimulator.Domain.Infrastructure.SaveManager.LoadGame();
+                    myPlayer = loadedData.Item1;
+                    gameTime = loadedData.Item2;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Помилка завантаження: {ex.Message}. Починаємо нову гру.");
+                    startChoice = "1";
+                }
+            }
+
+            if (startChoice != "2" || myPlayer == null || gameTime == null)
+            {
+                Console.Write("\nВведіть ім'я вашого гравця: ");
+                string playerName = Console.ReadLine() ?? "Гравець";
+                myPlayer = new Player(playerName, Position.Defender);
+                gameTime = new TimeManager(myPlayer);
+            }
 
             var training = new TrainingActivity();
             var rest = new RestActivity();
+            var match = new MatchActivity();
 
             bool isRunning = true;
 
@@ -33,13 +60,15 @@ namespace CareerSimulator.UI
                 Console.WriteLine($"Поточний тиждень: {gameTime.CurrentWeek}");
                 Console.WriteLine("==============================");
 
-                Console.WriteLine("Оберіть дію на цей тиждень:");
+                Console.WriteLine("Оберіть дію:");
                 Console.WriteLine($"1. {training.Name} (-30 енергії)");
                 Console.WriteLine($"2. {rest.Name} (Відновлює енергію)");
+                Console.WriteLine($"3. {match.Name} (-40 енергії)");
+                Console.WriteLine("8. ЗБЕРЕГТИ ГРУ");
                 Console.WriteLine("0. Вийти з гри");
                 Console.Write("Ваш вибір: ");
 
-                string choice = Console.ReadLine();
+                string choice = Console.ReadLine() ?? "";
 
                 switch (choice)
                 {
@@ -48,6 +77,12 @@ namespace CareerSimulator.UI
                         break;
                     case "2":
                         gameTime.ExecuteActivity(rest);
+                        break;
+                    case "3":
+                        gameTime.ExecuteActivity(match);
+                        break;
+                    case "8":
+                        CareerSimulator.Domain.Infrastructure.SaveManager.SaveGame(myPlayer, gameTime);
                         break;
                     case "0":
                         isRunning = false;

@@ -14,6 +14,10 @@ namespace CareerSimulator.Domain.Core
             _player = player;
             CurrentWeek = 1;
         }
+        public void SetWeek(int week)
+        {
+            CurrentWeek = week;
+        }
 
         public void ExecuteActivity(IActivity activity)
         {
@@ -35,6 +39,7 @@ namespace CareerSimulator.Domain.Core
             {
                 Console.WriteLine($"Щось пішло не так: {ex.Message}");
             }
+
         }
     }
 }

@@ -15,6 +15,7 @@
 
         public int Energy { get; private set; }
         public decimal Money { get; private set; }
+        public int BootsLevel { get; private set; } = 0;
 
         public int OverallRating { get; private set; }
 
@@ -65,6 +66,25 @@
             Energy = energy;
             Money = money;
             OverallRating = rating;
+        }
+        public void RestoreEnergy(int amount)
+        {
+            Energy += amount;
+            if (Energy > 100)
+                Energy = 100;
+        }
+
+        public void LoadState(int energy, decimal money, int rating, int bootsLevel)
+        {
+            Energy = energy;
+            Money = money;
+            OverallRating = rating;
+            BootsLevel = bootsLevel;
+        }
+
+        public void UpgradeBoots()
+        {
+            BootsLevel++;
         }
     }
 }

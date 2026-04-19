@@ -14,6 +14,7 @@ namespace CareerSimulator.Domain.Infrastructure
         public decimal Money { get; set; }
         public int OverallRating { get; set; }
         public int CurrentWeek { get; set; }
+        public int BootsLevel { get; set; }
     }
 
     public static class SaveManager
@@ -29,7 +30,8 @@ namespace CareerSimulator.Domain.Infrastructure
                 Energy = player.Energy,
                 Money = player.Money,
                 OverallRating = player.OverallRating,
-                CurrentWeek = timeManager.CurrentWeek
+                CurrentWeek = timeManager.CurrentWeek,
+                BootsLevel = player.BootsLevel
             };
 
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
@@ -56,6 +58,7 @@ namespace CareerSimulator.Domain.Infrastructure
 
             TimeManager loadedTime = new TimeManager(loadedPlayer);
             loadedTime.SetWeek(state.CurrentWeek);
+            loadedPlayer.LoadState(state.Energy, state.Money, state.OverallRating, state.BootsLevel);
 
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\n[Гру успішно завантажено!]");

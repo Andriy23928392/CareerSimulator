@@ -64,6 +64,7 @@ namespace CareerSimulator.UI
                 Console.WriteLine($"1. {training.Name} (-30 енергії)");
                 Console.WriteLine($"2. {rest.Name} (Відновлює енергію)");
                 Console.WriteLine($"3. {match.Name} (-40 енергії)");
+                Console.WriteLine("4. Відвідати магазин");
                 Console.WriteLine("8. ЗБЕРЕГТИ ГРУ");
                 Console.WriteLine("0. Вийти з гри");
                 Console.Write("Ваш вибір: ");
@@ -81,6 +82,9 @@ namespace CareerSimulator.UI
                     case "3":
                         gameTime.ExecuteActivity(match);
                         break;
+                    case "4":
+                        OpenStore(myPlayer); 
+                        break;
                     case "8":
                         CareerSimulator.Domain.Infrastructure.SaveManager.SaveGame(myPlayer, gameTime);
                         break;
@@ -91,6 +95,43 @@ namespace CareerSimulator.UI
                     default:
                         Console.WriteLine("Невідомий вибір, спробуйте ще раз.");
                         break;
+                }
+            }
+        }
+        static void OpenStore(Player player)
+        {
+            var storeItems = new CareerSimulator.Domain.Items.Item[]
+            {
+             new CareerSimulator.Domain.Items.EnergyDrink(),
+             new CareerSimulator.Domain.Items.EliteBoots(player.BootsLevel)
+            };
+
+            Console.WriteLine("\n=== СПОРТИВНИЙ МАГАЗИН ===");
+            Console.WriteLine($"Ваш баланс: {player.Money}$");
+
+            for (int i = 0; i < storeItems.Length; i++)
+            {
+                Console.WriteLine($"{i + 1}. {storeItems[i].Name} - Ціна: {storeItems[i].Price}$");
+            }
+            Console.WriteLine("0. Вийти з магазину");
+            Console.Write("Що бажаєте придбати? Ваш вибір: ");
+
+            string choice = Console.ReadLine() ?? "";
+
+            if (int.TryParse(choice, out int itemIndex) && itemIndex > 0 && itemIndex <= storeItems.Length)
+            {
+                var selectedItem = storeItems[itemIndex - 1];
+
+                try
+                {
+                    player.SpendMoney(selectedItem.Price);
+                    selectedItem.Apply(player);
+                }
+                catch (Exception ex)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"\nПОМИЛКА: {ex.Message}");
+                    Console.ResetColor();
                 }
             }
         }

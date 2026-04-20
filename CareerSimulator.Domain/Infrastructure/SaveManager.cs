@@ -24,6 +24,8 @@ namespace CareerSimulator.Domain.Infrastructure
         public int CryoLevel { get; set; }
         public int MentalLevel { get; set; }
         public int Reputation { get; set; }
+        public int TotalMatches { get; set; }
+        public int RetirementAge { get; set; }
     }
 
     public static class SaveManager
@@ -49,7 +51,9 @@ namespace CareerSimulator.Domain.Infrastructure
                 GearLevel = player.GearLevel,
                 CryoLevel = player.CryoLevel,
                 MentalLevel = player.MentalLevel,
-                Reputation = player.Reputation
+                Reputation = player.Reputation,
+                TotalMatches = player.Stats.TotalMatches,
+                RetirementAge = player.Stats.RetirementAge
             };
 
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
@@ -70,7 +74,7 @@ namespace CareerSimulator.Domain.Infrastructure
             Player loadedPlayer = new Player(state.PlayerName, state.PlayerPosition);
             loadedPlayer.LoadState(
                 state.Age, state.Energy, state.Money, state.OverallRating,state.ClubName, state.ClubSalary,
-                state.GymLevel, state.VillaLevel, state.GearLevel, state.CryoLevel, state.MentalLevel,state.Reputation
+                state.GymLevel, state.VillaLevel, state.GearLevel, state.CryoLevel, state.MentalLevel,state.Reputation, state.TotalMatches, state.RetirementAge
                 );
 
             TimeManager loadedTime = new TimeManager(loadedPlayer);

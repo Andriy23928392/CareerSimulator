@@ -44,7 +44,7 @@ namespace CareerSimulator.Domain.Logic
             new Club("Аль-Хіляль (СА)", 40000m, 83, 5000)
         };
 
-        public static Club? CheckForTransferOffers(Player player, DateTime currentDate)
+        public static Club CheckForTransferOffers(Player player, DateTime currentDate)
         {
             bool isWinterWindow = currentDate.Month == 1;
             bool isSummerWindow = currentDate.Month == 7 || currentDate.Month == 8;
@@ -54,19 +54,26 @@ namespace CareerSimulator.Domain.Logic
 
             var availableClubs = _standardClubs
                 .Where(c => player.OverallRating >= c.RequiredRating
-                        && player.Reputation >= c.RequiredReputation
-                        && c.Name != player.CurrentClub.Name)
+                         && player.Reputation >= c.RequiredReputation
+                         && c.Name != player.CurrentClub.Name)
                 .ToList();
 
             if (player.Age >= 34)
             {
-                availableClubs.AddRange(_veteranClubs
-                    .Where(c => player.OverallRating >= c.RequiredRating && c.Name != player.CurrentClub.Name));
+                var veteranOffers = _veteranClubs
+                    .Where(c => player.OverallRating >= c.RequiredRating
+                             && player.Reputation >= c.RequiredReputation 
+                             && c.Name != player.CurrentClub.Name)
+                    .ToList();
+
+                availableClubs.AddRange(veteranOffers);
             }
 
             if (availableClubs.Count == 0) return null;
 
-            return availableClubs[_random.Next(availableClubs.Count)];
+            var bestOffer = availableClubs.OrderByDescending(c => c.WeeklySalary).First();
+
+            return bestOffer;
         }
     }
 }

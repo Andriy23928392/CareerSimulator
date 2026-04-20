@@ -45,25 +45,83 @@ namespace CareerSimulator.Domain.Core
             }
         }
 
-        private void AdvanceTime()
+        public void AdvanceTime()
         {
-            int oldMonth = CurrentDate.Month;
+            DateTime oldDate = CurrentDate;
             CurrentDate = CurrentDate.AddDays(7);
 
-            if (oldMonth == 8 && CurrentDate.Month == 9)
+            if (_player.CurrentClub.WeeklySalary > 0)
             {
-                _player.HaveBirthday();
-                Console.WriteLine($"\n[ДЕНЬ НАРОДЖЕННЯ!] Вам тепер {_player.Age} років.");
+                _player.EarnMoney(_player.CurrentClub.WeeklySalary);
+            }
+            if (_player.SponsorIncome > 0)
+            {
+                _player.EarnMoney(_player.SponsorIncome);
             }
 
-            if (_player.CurrentClub.WeeklySalary > 0)
-                _player.EarnMoney(_player.CurrentClub.WeeklySalary);
+            if (CurrentDate.Year > oldDate.Year)
+            {
+                _player.SetAge(_player.Age + 1);
+                Console.ForegroundColor = ConsoleColor.Magenta;
+                Console.WriteLine($"\n🎂 З днем народження! Вам тепер {_player.Age} років.");
+                Console.ResetColor();
 
-            if (_player.CurrentClub.WeeklySalary > 0)
-                _player.EarnMoney(_player.CurrentClub.WeeklySalary);
+                if (_player.Age >= _player.Stats.RetirementAge)
+                {
+                    EndCareer();
+                    return;
+                }
+            }
 
-            if (_player.SponsorIncome > 0)
-                _player.EarnMoney(_player.SponsorIncome);
+            if (_player.Age >= 30)
+            {
+                if (CurrentDate.Month != oldDate.Month)
+                {
+                    int degradeChance = 30 + ((_player.Age - 30) * 5);
+                    if (new Random().Next(1, 101) <= degradeChance)
+                    {
+                        _player.ChangeRating(-1);
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\n[📉 СТАРІННЯ] Роки беруть своє... Ваш загальний рейтинг впав на 1.");
+                        Console.ResetColor();
+                    }
+                }
+            }
+        }
+
+        private void EndCareer()
+        {
+            Console.Clear();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("==================================================");
+            Console.WriteLine("        🏁 КАР'ЄРА ОФІЦІЙНО ЗАВЕРШЕНА 🏁        ");
+            Console.WriteLine("==================================================");
+            Console.ResetColor();
+
+            Console.WriteLine($"\nГравець: {_player.Name}");
+            Console.WriteLine($"Фінальний вік: {_player.Age} років");
+            Console.WriteLine($"Останній клуб: {_player.CurrentClub.Name}");
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine($"Зіграно матчів: {_player.Stats.TotalMatches}");
+            Console.WriteLine($"Зароблено грошей: {_player.Money}$");
+            Console.WriteLine($"Фінальна Слава: {_player.Reputation}");
+            Console.WriteLine($"Фінальний Рейтинг: {_player.OverallRating}");
+            Console.WriteLine("--------------------------------------------------");
+
+            string title;
+            if (_player.Reputation >= 2000 && _player.OverallRating >= 85) title = "ЛЕГЕНДА СВІТОВОГО ФУТБОЛУ 👑";
+            else if (_player.Reputation >= 500 || _player.OverallRating >= 75) title = "ВИДАТНИЙ ПРОФЕСІОНАЛ 🌟";
+            else if (_player.Stats.TotalMatches > 100) title = "ВЕТЕРАН ТА УЛЮБЛЕНЕЦЬ ФАНАТІВ 👏";
+            else title = "ДОБРОТНИЙ ГРАВЕЦЬ 👍";
+
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"ВАШ СТАТУС В ІСТОРІЇ: {title}");
+            Console.ResetColor();
+
+            Console.WriteLine("\nДякуємо за цю неймовірну подорож!");
+            Console.WriteLine("Натисніть будь-яку клавішу для виходу з гри...");
+            Console.ReadKey();
+            Environment.Exit(0);
         }
 
         public void SimulateYear()

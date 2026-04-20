@@ -63,6 +63,7 @@ namespace CareerSimulator.Domain.Activities
                 }
             }
 
+            player.Stats.AddMatchPlayed();
             Console.ResetColor();
         }
     }

@@ -58,6 +58,12 @@ namespace CareerSimulator.Domain.Core
 
             if (_player.CurrentClub.WeeklySalary > 0)
                 _player.EarnMoney(_player.CurrentClub.WeeklySalary);
+
+            if (_player.CurrentClub.WeeklySalary > 0)
+                _player.EarnMoney(_player.CurrentClub.WeeklySalary);
+
+            if (_player.SponsorIncome > 0)
+                _player.EarnMoney(_player.SponsorIncome);
         }
 
         public void SimulateYear()
@@ -70,25 +76,23 @@ namespace CareerSimulator.Domain.Core
 
             for (int i = 0; i < 52; i++)
             {
-                if (_player.Energy >= 30)
+                int energyCost = Math.Max(5, 30 - _player.TrainingDiscount);
+                if (_player.Energy >= energyCost)
                 {
-                    _player.SpendEnergy(30);                 
-                    energySpent += 30;
+                    _player.SpendEnergy(energyCost);
+                    int totalChance = 15 + (_player.TrainingChanceBonus / 2);
+                    if (_random.Next(1, 101) <= totalChance) { _player.ChangeRating(1); }
+                    energySpent += energyCost;
                 }
-                if (_random.Next(1, 101) <= 20)
-                {
-                    _player.ChangeRating(1);
-                }
-
                 else
                 {
-                    _player.RestoreEnergy(100);
+                    _player.RestoreEnergy(_player.MaxEnergy);
                 }
 
                 AdvanceTime();
             }
 
-            Infrastructure.SaveManager.SaveGame(_player, this);
+            CareerSimulator.Domain.Infrastructure.SaveManager.SaveGame(_player, this);
 
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("\n======================================");

@@ -11,8 +11,8 @@ namespace CareerSimulator.Domain.Activities
 
         public void Execute(Player player)
         {
-            player.Rest();
-            Console.WriteLine($"{player.Name} добре відпочив. Енергія на максимумі (100)!");
+            player.RestoreEnergy(player.MaxEnergy);
+            Console.WriteLine($"\nВи добре відпочили вдома. Енергія повністю відновлена (до {player.MaxEnergy})!");
         }
     }
 }

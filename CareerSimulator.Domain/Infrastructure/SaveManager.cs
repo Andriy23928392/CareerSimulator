@@ -14,11 +14,16 @@ namespace CareerSimulator.Domain.Infrastructure
         public decimal Money { get; set; }
         public int OverallRating { get; set; }
         public int CurrentWeek { get; set; }
-        public int BootsLevel { get; set; }
         public string ClubName { get; set; } = string.Empty;
         public decimal ClubSalary { get; set; }
         public DateTime CurrentDate { get; set; }
         public int Age { get; set; }
+        public int GymLevel { get; set; }
+        public int VillaLevel { get; set; }
+        public int GearLevel { get; set; }
+        public int CryoLevel { get; set; }
+        public int MentalLevel { get; set; }
+        public int Reputation { get; set; }
     }
 
     public static class SaveManager
@@ -36,10 +41,15 @@ namespace CareerSimulator.Domain.Infrastructure
                 Money = player.Money,
                 OverallRating = player.OverallRating,
                 CurrentWeek = timeManager.CurrentWeek,
-                BootsLevel = player.BootsLevel,
                 CurrentDate = timeManager.CurrentDate,
                 ClubName = player.CurrentClub.Name,
-                ClubSalary = player.CurrentClub.WeeklySalary
+                ClubSalary = player.CurrentClub.WeeklySalary,
+                GymLevel = player.GymLevel,
+                VillaLevel = player.VillaLevel,
+                GearLevel = player.GearLevel,
+                CryoLevel = player.CryoLevel,
+                MentalLevel = player.MentalLevel,
+                Reputation = player.Reputation
             };
 
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
@@ -58,7 +68,10 @@ namespace CareerSimulator.Domain.Infrastructure
             if (state == null) throw new Exception("Помилка даних!");
 
             Player loadedPlayer = new Player(state.PlayerName, state.PlayerPosition);
-            loadedPlayer.LoadState(state.Age, state.Energy, state.Money, state.OverallRating, state.BootsLevel, state.ClubName, state.ClubSalary);
+            loadedPlayer.LoadState(
+                state.Age, state.Energy, state.Money, state.OverallRating,state.ClubName, state.ClubSalary,
+                state.GymLevel, state.VillaLevel, state.GearLevel, state.CryoLevel, state.MentalLevel,state.Reputation
+                );
 
             TimeManager loadedTime = new TimeManager(loadedPlayer);
             loadedTime.SetDate(state.CurrentDate);

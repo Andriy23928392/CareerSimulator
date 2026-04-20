@@ -12,17 +12,20 @@ namespace CareerSimulator.Domain.Activities
         private static readonly Random _random = new Random();
         public void Execute(Player player)
         {
-            player.SpendEnergy(30);
+            int energyCost = Math.Max(5, 30 - player.TrainingDiscount);
+            player.SpendEnergy(energyCost);
 
-            Console.WriteLine($"{player.Name} успішно провів тренування! Енергія зменшилась.");
-            if (_random.Next(1, 101) <= 25)
+            Console.Write($"\nВи успішно провели інтенсивне тренування (-{energyCost} енергії).");
+
+            int totalChance = 30 + player.TrainingChanceBonus;
+
+            if (_random.Next(1, 101) <= totalChance)
             {
                 player.ChangeRating(1);
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write(" Ваша форма покращилась: Рейтинг +1!");
+                Console.Write($" Форма покращилась (Шанс був {totalChance}%): Рейтинг +1!");
                 Console.ResetColor();
             }
-
             Console.WriteLine();
         }
 

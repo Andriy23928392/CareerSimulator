@@ -15,7 +15,8 @@ namespace CareerSimulator.Domain.Activities
         {
             int currentEnergy = player.Energy;
 
-            player.SpendEnergy(40);
+            int matchCost = Math.Max(10, 40 - player.MatchDiscount);
+            player.SpendEnergy(matchCost);
 
             int opponentRating = _random.Next(Math.Max(10, player.OverallRating - 15), player.OverallRating + 15);
 
@@ -23,7 +24,8 @@ namespace CareerSimulator.Domain.Activities
             double effectivePower = player.OverallRating * energyFactor;
 
             double winChance = 50 + (effectivePower - opponentRating) * 1.5;
-            winChance = Math.Clamp(winChance, 5, 95);
+            winChance += player.WinChanceBonus;
+            winChance = Math.Clamp(winChance, 5, 99);
 
             Console.WriteLine($"\nСуперник: Команда з рейтингом {opponentRating}");
             Console.WriteLine($"Ваша ефективна сила з урахуванням втоми: {Math.Round(effectivePower, 1)}");

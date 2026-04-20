@@ -2,15 +2,18 @@
 {
     public class Club
     {
-        public string Name { get; private set; }
-        public decimal WeeklySalary { get; private set; }
-        public int RequiredRating { get; private set; }
+        public string Name { get; set; }
+        public decimal WeeklySalary { get; set; }
+        public int RequiredRating { get; set; }
 
-        public Club(string name, decimal weeklySalary, int requiredRating)
+        public int RequiredReputation { get; set; }
+
+        public Club(string name, decimal weeklySalary, int requiredRating, int requiredReputation = 0)
         {
             Name = name;
             WeeklySalary = weeklySalary;
             RequiredRating = requiredRating;
+            RequiredReputation = requiredReputation;
         }
     }
 }

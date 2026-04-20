@@ -12,10 +12,19 @@ namespace CareerSimulator.Domain.Activities
         private static readonly Random _random = new Random();
         public void Execute(Player player)
         {
-            int energyCost = Math.Max(5, 30 - player.TrainingDiscount);
-            player.SpendEnergy(energyCost);
+            if (player.TrainingsThisWeek >= 5)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\n[!] Ліміт вичерпано! Тренер забороняє тренуватися більше 5 разів на тиждень через ризик травм. Йдіть на Відпочинок.");
+                Console.ResetColor();
+                return;
+            }
+            int trainingCost = Math.Max(5, 30 - player.TrainingDiscount);
+            try { player.SpendEnergy(trainingCost); }
+            catch (Exception ex) { Console.WriteLine(ex.Message); return; }
+            player.AddTrainingThisWeek();
 
-            Console.Write($"\nВи успішно провели інтенсивне тренування (-{energyCost} енергії).");
+            Console.Write($"\nВи успішно провели інтенсивне тренування (-{trainingCost} енергії).");
 
             int totalChance = 30 + player.TrainingChanceBonus;
 

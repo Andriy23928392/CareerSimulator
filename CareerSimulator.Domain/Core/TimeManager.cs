@@ -20,28 +20,13 @@ namespace CareerSimulator.Domain.Core
 
         public int CurrentWeek => (CurrentDate - new DateTime(2025, 9, 1)).Days / 7 + 1;
 
-        public void ExecuteActivity(IActivity activity)
+        public void ExecuteActivity(CareerSimulator.Domain.Interfaces.IActivity activity)
         {
-            Console.WriteLine($"\n--- {CurrentDate.ToString("d MMMM yyyy")} (Тиждень {CurrentWeek}) ---");
-            Console.WriteLine($"Дія: {activity.Name}");
+            activity.Execute(_player);
 
-            try
+            if (activity is CareerSimulator.Domain.Activities.RestActivity)
             {
-                activity.Execute(_player);
-
                 AdvanceTime();
-
-                if ((CurrentDate - _lastTransferDate).TotalDays > 150)
-                {
-                    var offer = Logic.TransferManager.CheckForTransferOffers(_player, CurrentDate);
-                    if (offer != null) HandleTransferOffer(offer);
-                }
-
-                Events.EventManager.TriggerRandomEvent(_player);
-            }
-            catch (Exceptions.NotEnoughEnergyException ex)
-            {
-                Console.WriteLine($"ПОМИЛКА: {ex.Message}");
             }
         }
 
@@ -50,14 +35,15 @@ namespace CareerSimulator.Domain.Core
             DateTime oldDate = CurrentDate;
             CurrentDate = CurrentDate.AddDays(7);
 
+            // 1. ОНОВЛЕННЯ ЛІМІТІВ ТА ЗДОРОВ'Я
+            _player.ResetWeeklyLimits();
+            _player.HealOneWeek();
+
+            // 2. ФІНАНСИ
             if (_player.CurrentClub.WeeklySalary > 0)
-            {
                 _player.EarnMoney(_player.CurrentClub.WeeklySalary);
-            }
             if (_player.SponsorIncome > 0)
-            {
                 _player.EarnMoney(_player.SponsorIncome);
-            }
 
             if (CurrentDate.Year > oldDate.Year)
             {
@@ -73,19 +59,39 @@ namespace CareerSimulator.Domain.Core
                 }
             }
 
-            if (_player.Age >= 30)
+            if (_player.Age >= 30 && CurrentDate.Month != oldDate.Month)
             {
-                if (CurrentDate.Month != oldDate.Month)
+                int degradeChance = 30 + ((_player.Age - 30) * 5);
+                if (new Random().Next(1, 101) <= degradeChance)
                 {
-                    int degradeChance = 30 + ((_player.Age - 30) * 5);
-                    if (new Random().Next(1, 101) <= degradeChance)
-                    {
-                        _player.ChangeRating(-1);
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("\n[📉 СТАРІННЯ] Роки беруть своє... Ваш загальний рейтинг впав на 1.");
-                        Console.ResetColor();
-                    }
+                    _player.ChangeRating(-1);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("\n[📉 СТАРІННЯ] Роки беруть своє... Ваш загальний рейтинг впав на 1.");
+                    Console.ResetColor();
                 }
+            }
+
+            CareerSimulator.Domain.Events.EventManager.TriggerWeeklyEvent(_player);
+
+            var offer = CareerSimulator.Domain.Logic.TransferManager.CheckForTransferOffers(_player, CurrentDate);
+            if (offer != null)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("\n=============================================");
+                Console.WriteLine($"🚨 ТРАНСФЕРНА ПРОПОЗИЦІЯ! Клуб {offer.Name} зацікавився вами!");
+                Console.WriteLine($"Пропонована зарплата: {offer.WeeklySalary}$ на тиждень.");
+                Console.WriteLine("=============================================");
+                Console.WriteLine("1. Підписати контракт");
+                Console.WriteLine("2. Відмовитись і залишитись");
+                Console.Write("Ваш вибір: ");
+
+                string transferChoice = Console.ReadLine() ?? "";
+                if (transferChoice == "1")
+                {
+                    _player.SignContract(offer);
+                    Console.WriteLine($"\nВітаємо! Ви офіційно стали гравцем {offer.Name}!");
+                }
+                Console.ResetColor();
             }
         }
 

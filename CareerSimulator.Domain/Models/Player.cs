@@ -22,6 +22,8 @@ namespace CareerSimulator.Domain.Models
         public decimal Money { get; private set; }
         public int OverallRating { get; private set; }
         public int Age { get; private set; }
+        public int MatchesThisWeek { get; private set; } = 0;
+        public int TrainingsThisWeek { get; private set; } = 0;
 
         public int SponsorIncome { get; private set; } = 0;
         public string SponsorName { get; private set; } = "Немає";
@@ -41,12 +43,18 @@ namespace CareerSimulator.Domain.Models
         public int GearLevel => Upgrades.GearLevel;
         public int CryoLevel => Upgrades.CryoLevel;
         public int MentalLevel => Upgrades.MentalLevel;
+        // --- ТРАВМИ ---
+        public bool IsInjured => WeeksInjured > 0;
+        public int WeeksInjured { get; private set; } = 0;
+        public string InjuryName { get; private set; } = "";
 
         public void UpgradeGym() => Upgrades.UpgradeGym();
         public void UpgradeVilla() { Upgrades.UpgradeVilla(); RestoreEnergy(MaxEnergy); }
         public void UpgradeGear() => Upgrades.UpgradeGear();
         public void UpgradeCryo() => Upgrades.UpgradeCryo();
         public void UpgradeMental() => Upgrades.UpgradeMental();
+        public void AddMatchThisWeek() => MatchesThisWeek++;
+        public void AddTrainingThisWeek() => TrainingsThisWeek++;
 
 
         public Player(string name, Position position)
@@ -124,6 +132,26 @@ namespace CareerSimulator.Domain.Models
 
             Stats.LoadStats(totalMatches, retirementAge);
             Upgrades.LoadUpgrades(gymLvl, villaLvl, gearLvl, cryoLvl, mentalLvl);
+        }
+        public void SufferInjury(string name, int durationInWeeks)
+        {
+            WeeksInjured = durationInWeeks;
+            InjuryName = name;
+            Energy = 30;
+        }
+
+        public void HealOneWeek()
+        {
+            if (WeeksInjured > 0)
+            {
+                WeeksInjured--;
+                if (WeeksInjured == 0) InjuryName = "";
+            }
+        }
+        public void ResetWeeklyLimits()
+        {
+            MatchesThisWeek = 0;
+            TrainingsThisWeek = 0;
         }
     }
 }

@@ -4,9 +4,8 @@ namespace CareerSimulator.Domain.Items
 {
     public abstract class Item
     {
-        public string Name { get; protected set; } = string.Empty;
-        public decimal Price { get; protected set; }
-
+        public abstract string Name { get; }
+        public abstract decimal Price { get; }
         public abstract void Apply(Player player);
     }
 }

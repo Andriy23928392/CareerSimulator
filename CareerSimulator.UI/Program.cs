@@ -43,7 +43,21 @@ namespace CareerSimulator.UI
             {
                 Console.Write("\nВведіть ім'я вашого гравця: ");
                 string playerName = Console.ReadLine() ?? "Гравець";
-                myPlayer = new Player(playerName, Position.Defender);
+
+                Console.WriteLine("Оберіть позицію на полі:");
+                Console.WriteLine("1. Голкіпер");
+                Console.WriteLine("2. Захисник");
+                Console.WriteLine("3. Півзахисник");
+                Console.WriteLine("4. Нападник");
+                Console.Write("Ваш вибір: ");
+                string posChoice = Console.ReadLine() ?? "2";
+
+                Position startingPos = Position.Defender;
+                if (posChoice == "1") startingPos = Position.Goalkeeper;
+                else if (posChoice == "3") startingPos = Position.Midfielder;
+                else if (posChoice == "4") startingPos = Position.Forward;
+
+                myPlayer = new Player(playerName, startingPos);
                 gameTime = new TimeManager(myPlayer);
             }
 
@@ -59,10 +73,16 @@ namespace CareerSimulator.UI
                 int actualMatchCost = Math.Max(10, 40 - myPlayer.MatchDiscount);
 
                 Console.WriteLine("\n==============================");
-                Console.WriteLine($"Статус гравця: {myPlayer.Name} ({myPlayer.Age} років) | Клуб: {myPlayer.CurrentClub.Name}");
-                Console.WriteLine($"Енергія: {myPlayer.Energy} | Гроші: {myPlayer.Money}$ | Рейтинг: {myPlayer.OverallRating}");
+                Console.WriteLine($"Статус: {myPlayer.Name} ({myPlayer.Age} років) | {myPlayer.PlayerPosition} | {myPlayer.CurrentClub.Name}"); Console.WriteLine($"Енергія: {myPlayer.Energy} | Гроші: {myPlayer.Money}$ | Рейтинг: {myPlayer.OverallRating}");
                 Console.WriteLine($"Дата: {gameTime.CurrentDate.ToString("dd.MM.yyyy")}");
                 Console.WriteLine("==============================");
+
+                if (myPlayer.IsInjured)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine($"🚑 СТАТУС: Травмований ({myPlayer.InjuryName}). Залишилося: {myPlayer.WeeksInjured} тижнів.");
+                    Console.ResetColor();
+                }
 
                 Console.WriteLine("Оберіть дію:");
                 Console.WriteLine($"1. Інтенсивне тренування (-{actualTrainingCost} енергії)");
@@ -72,8 +92,9 @@ namespace CareerSimulator.UI
                 Console.WriteLine("5. Модифікатори");
                 Console.WriteLine("6. Благодійний фонд");
                 Console.WriteLine("7. Рекламні контракти");
-                Console.WriteLine("8. Просимулювати РІК");
-                Console.WriteLine("9. ЗБЕРЕГТИ ГРУ");
+                Console.WriteLine("8. Профіль гравця");
+                Console.WriteLine("9. Просимулювати РІК");
+                Console.WriteLine("10. Зберегти гру");
                 Console.WriteLine("0. Вийти з гри");
                 Console.Write("Ваш вибір: ");
 
@@ -82,13 +103,17 @@ namespace CareerSimulator.UI
                 switch (choice)
                 {
                     case "1":
+                        if (myPlayer.IsInjured) { Console.WriteLine("Ви травмовані! Треба відпочивати."); break; }
                         gameTime.ExecuteActivity(training);
+                        MedicalCenter.CheckForInjury(myPlayer, false);
                         break;
                     case "2":
                         gameTime.ExecuteActivity(rest);
                         break;
                     case "3":
+                        if (myPlayer.IsInjured) { Console.WriteLine("Ви травмовані! Треба відпочивати."); break; }
                         gameTime.ExecuteActivity(match);
+                        MedicalCenter.CheckForInjury(myPlayer, false);
                         break;
                     case "4":
                         StoreMenu.OpenStore(myPlayer);
@@ -103,9 +128,12 @@ namespace CareerSimulator.UI
                         SocialMenu.OpenSponsors(myPlayer);
                         break;
                     case "8":
-                        gameTime.SimulateYear();
+                        ProfileMenu.OpenProfile(myPlayer);
                         break;
                     case "9":
+                        gameTime.SimulateYear();
+                        break;
+                    case "10":
                         CareerSimulator.Domain.Infrastructure.SaveManager.SaveGame(myPlayer, gameTime);
                         break;
                     case "0":

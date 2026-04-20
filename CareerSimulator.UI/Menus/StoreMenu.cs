@@ -9,7 +9,9 @@ namespace CareerSimulator.UI.Menus
         {
             var storeItems = new CareerSimulator.Domain.Items.Item[]
             {
-                new CareerSimulator.Domain.Items.EnergyDrink(),
+                new CareerSimulator.Domain.Items.ProteinShake(),
+                new CareerSimulator.Domain.Items.PrCampaign(),  
+                new CareerSimulator.Domain.Items.PremiumRehab()  
             };
 
             Console.WriteLine("\n=== ЗВИЧАЙНИЙ МАГАЗИН ===");

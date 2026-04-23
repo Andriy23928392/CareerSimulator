@@ -54,4 +54,23 @@ namespace CareerSimulator.Domain.Items
             Console.ResetColor();
         }
     }
+
+    public class PsychologistSession : Item
+    {
+        public override string Name => "Сеанс у спортивного психолога (+30 Моралі)";
+        public override decimal Price => 500m;
+
+        public override void Apply(Player player)
+        {
+            if (player.Morale >= 100)
+            {
+                throw new Exception("У вас ідеальний настрій, психолог не потрібен!");
+            }
+
+            player.ChangeMorale(30);
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"\n[+] Психолог допоміг розібратися з думками! Мораль зросла до {player.Morale}.");
+            Console.ResetColor();
+        }
+    }
 }

@@ -24,6 +24,7 @@ namespace CareerSimulator.Domain.Models
         public int Age { get; private set; }
         public int MatchesThisWeek { get; private set; } = 0;
         public int TrainingsThisWeek { get; private set; } = 0;
+        public int Morale { get; private set; } = 60;
 
         public int SponsorIncome { get; private set; } = 0;
         public string SponsorName { get; private set; } = "Немає";
@@ -70,9 +71,19 @@ namespace CareerSimulator.Domain.Models
 
         public void SpendEnergy(int amount)
         {
-            if (Energy - amount < 0)
-                throw new Domain.Exceptions.NotEnoughEnergyException($"Недостатньо енергії! Потрібно {amount}, а є {Energy}.");
-            Energy -= amount;
+            if (Morale < 30)
+            {
+                amount = (int)(amount * 1.5);
+            }
+
+            if (Energy >= amount)
+            {
+                Energy -= amount;
+            }
+            else
+            {
+                throw new Exception("Недостатньо енергії!");
+            }
         }
 
         public void DecreaseEnergy(int amount)
@@ -152,6 +163,12 @@ namespace CareerSimulator.Domain.Models
         {
             MatchesThisWeek = 0;
             TrainingsThisWeek = 0;
+        }
+        public void ChangeMorale(int amount)
+        {
+            Morale += amount;
+            if (Morale > 100) Morale = 100;
+            if (Morale < 0) Morale = 0;
         }
     }
 }

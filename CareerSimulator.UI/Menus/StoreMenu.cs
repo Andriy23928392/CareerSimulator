@@ -1,5 +1,6 @@
 ﻿using System;
 using CareerSimulator.Domain.Models;
+using CareerSimulator.Domain.Items;
 
 namespace CareerSimulator.UI.Menus
 {
@@ -7,39 +8,70 @@ namespace CareerSimulator.UI.Menus
     {
         public static void OpenStore(Player player)
         {
-            var storeItems = new CareerSimulator.Domain.Items.Item[]
+            var storeItems = new Item[]
             {
-                new CareerSimulator.Domain.Items.ProteinShake(),
-                new CareerSimulator.Domain.Items.PrCampaign(),  
-                new CareerSimulator.Domain.Items.PremiumRehab()  
+                new ProteinShake(),
+                new PrCampaign(),
+                new PremiumRehab(),
+                new PsychologistSession()
             };
 
-            Console.WriteLine("\n=== ЗВИЧАЙНИЙ МАГАЗИН ===");
-            Console.WriteLine($"Ваш баланс: {player.Money}$");
-
-            for (int i = 0; i < storeItems.Length; i++)
+            while (true)
             {
-                Console.WriteLine($"{i + 1}. {storeItems[i].Name} - Ціна: {storeItems[i].Price}$");
-            }
-            Console.WriteLine("0. Вийти з магазину");
-            Console.Write("Що бажаєте придбати? Ваш вибір: ");
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("==================================================");
+                Console.WriteLine("                МАГАЗИН ПРЕДМЕТІВ                 ");
+                Console.WriteLine("==================================================");
+                Console.ResetColor();
 
-            string choice = Console.ReadLine() ?? "";
+                Console.WriteLine($"Ваш баланс: {player.Money}$");
+                Console.WriteLine("Оберіть товар для покупки:\n");
 
-            if (int.TryParse(choice, out int itemIndex) && itemIndex > 0 && itemIndex <= storeItems.Length)
-            {
-                var selectedItem = storeItems[itemIndex - 1];
-                try
+                for (int i = 0; i < storeItems.Length; i++)
                 {
-                    player.SpendMoney(selectedItem.Price);
-                    selectedItem.Apply(player);
+                    Console.WriteLine($"{i + 1}. {storeItems[i].Name} - Ціна: {storeItems[i].Price}$");
                 }
-                catch (Exception ex)
+                Console.WriteLine("0. Вийти з магазину");
+                Console.Write("\nВаш вибір: ");
+
+                string choice = Console.ReadLine() ?? "";
+
+                if (choice == "0") break;
+
+                if (int.TryParse(choice, out int itemIndex) && itemIndex > 0 && itemIndex <= storeItems.Length)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"\nПОМИЛКА: {ex.Message}");
-                    Console.ResetColor();
+                    Item selectedItem = storeItems[itemIndex - 1];
+
+                    if (player.Money >= selectedItem.Price)
+                    {
+                        try
+                        {
+                            selectedItem.Apply(player);
+                            player.SpendMoney(selectedItem.Price);
+                            Console.WriteLine($"Ви успішно придбали: {selectedItem.Name}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine($"\n[Помилка] {ex.Message}");
+                            Console.ResetColor();
+                        }
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\n[Помилка] Недостатньо коштів для покупки!");
+                        Console.ResetColor();
+                    }
                 }
+                else
+                {
+                    Console.WriteLine("\nНевірний вибір.");
+                }
+
+                Console.WriteLine("\nНатисніть будь-яку клавішу...");
+                Console.ReadKey();
             }
         }
 
@@ -47,6 +79,7 @@ namespace CareerSimulator.UI.Menus
         {
             while (true)
             {
+                Console.Clear(); 
                 Console.WriteLine("\n=== VIP АГЕНТСТВО 'LUXURY LIFE' ===");
                 Console.WriteLine($"Ваш баланс: {player.Money}$");
                 Console.WriteLine($"Макс. Енергія: {player.MaxEnergy} | Знижка Тренування: -{player.TrainingDiscount} | Знижка Матчу: -{player.MatchDiscount}");
@@ -110,6 +143,9 @@ namespace CareerSimulator.UI.Menus
                     Console.WriteLine($"\nПОМИЛКА: {ex.Message}");
                     Console.ResetColor();
                 }
+
+                Console.WriteLine("\nНатисніть будь-яку клавішу...");
+                Console.ReadKey();
             }
         }
     }

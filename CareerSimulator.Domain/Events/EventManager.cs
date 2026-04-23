@@ -7,36 +7,6 @@ namespace CareerSimulator.Domain.Events
     {
         private static Random _random = new Random();
 
-        public static void TriggerWeeklyEvent(Player player)
-        {
-            if (_random.Next(1, 101) <= 15)
-            {
-                Console.Clear();
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("📸 ПОЗАФУТБОЛЬНЕ ЖИТТЯ");
-                Console.WriteLine("Папараці сфотографували вас у нічному клубі перед важливим тренуванням...");
-                Console.ResetColor();
-
-                Console.WriteLine("1. Збрехати, що це старе фото (+10 Слави, але є ризик)");
-                Console.WriteLine("2. (Відповідально) Вибачитися перед фанатами (+20 Слави за чесність)");
-                Console.Write("Ваша вибір: ");
-
-                string choice = Console.ReadLine() ?? "2";
-                if (choice == "1" && _random.Next(1, 100) <= 50)
-                {
-                    Console.WriteLine("\n❌ Вам не повірили. Тренер незадоволений. Слава -20.");
-                    player.ChangeReputation(-20);
-                }
-                else
-                {
-                    Console.WriteLine("\n✅ Конфлікт вичерпано. Ваша популярність зросла. Слава +20.");
-                    player.ChangeReputation(20);
-                }
-                Console.WriteLine("\nНатисніть будь-яку клавішу...");
-                Console.ReadKey();
-            }
-        }
-
         public static void TriggerPostMatchInterview(Player player, bool isWin, bool isDraw)
         {
             Console.Clear();
@@ -65,7 +35,7 @@ namespace CareerSimulator.Domain.Events
             }
             else
             {
-                Console.WriteLine("Журналіст: 'Результат сьогодні жахливий. Що пішло не так?'");
+                Console.WriteLine("Журналіст: 'Результат сьогодні залишає бажати кращого. Що пішло не так?'");
                 Console.WriteLine("1. (Відповідально) Це моя провина. Я маю грати краще.");
                 Console.WriteLine("2. (Скандально) Суддя був сліпий, а наш захист просто спав!");
                 Console.WriteLine("3. (Спокійно) Це футбол. Зробимо висновки і підемо далі.");
@@ -93,27 +63,25 @@ namespace CareerSimulator.Domain.Events
             Console.WriteLine("Зал повен журналістів. Спалахи камер. До вас звертаються з питаннями...");
             Console.ResetColor();
 
-            Console.WriteLine("\n[Питання 1/3] Журналіст: 'Що ви думаєте про сьогоднішнього суперника? Вони виглядають грізно.'");
+            Console.WriteLine("\n[Питання 1/3] Журналіст: 'Що ви думаєте про сьогоднішнього суперника?'");
             Console.WriteLine("1. (З повагою) Це сильна команда, але ми добре підготувалися.");
             Console.WriteLine("2. (Зухвало) Ми їх просто знищимо. Навіть не сумнівайтесь.");
             Console.WriteLine("3. (Відповідально) Головне — це наша гра. Якщо ми виконаємо план тренера, все буде добре.");
             Console.Write("Ваша відповідь: ");
-
             string ans1 = Console.ReadLine() ?? "1";
             if (ans1 == "1") { player.ChangeReputation(10); Console.WriteLine("✅ Спокійна та поважна відповідь. (Слава +10)"); }
             else if (ans1 == "2")
             {
                 if (_random.Next(1, 101) <= 50) { player.ChangeReputation(30); Console.WriteLine("🔥 Фанатам подобається ця зухвалість! (Слава +30)"); }
-                else { player.ChangeReputation(-20); Console.WriteLine("❌ Суперник отримав додаткову мотивацію через вашу самовпевненість. (Слава -20)"); }
+                else { player.ChangeReputation(-20); Console.WriteLine("❌ Суперник отримав додаткову мотивацію. (Слава -20)"); }
             }
             else { player.ChangeReputation(15); Console.WriteLine("🛡️ Професійний підхід справжнього лідера. (Слава +15)"); }
 
             Console.WriteLine("\n[Питання 2/3] Журналіст: 'Від вас сьогодні багато очікують. Чи відчуваєте ви тиск?'");
             Console.WriteLine("1. (Відповідально) Тиск — це частина футболу. Я беру цю відповідальність на себе.");
-            Console.WriteLine("2. (Впевнено) Який тиск? Я народжений для таких матчів. Сьогодні буде шоу!");
+            Console.WriteLine("2. (Впевнено) Який тиск? Я народжений для таких матчів!");
             Console.WriteLine("3. (Скромно) Я просто вийду і зроблю все можливе для команди.");
             Console.Write("Ваша відповідь: ");
-
             string ans2 = Console.ReadLine() ?? "1";
             if (ans2 == "1") { player.ChangeReputation(20); Console.WriteLine("🛡️ Вболівальники бачать у вас надійного гравця. (Слава +20)"); }
             else if (ans2 == "2")
@@ -128,7 +96,6 @@ namespace CareerSimulator.Domain.Events
             Console.WriteLine("2. (Інтелектуально) Ми проаналізували минулі помилки. Сьогодні ви побачите зовсім іншу тактику.");
             Console.WriteLine("3. (Агресивно) Готуйтеся святкувати, ми рознесемо їх вщент!");
             Console.Write("Ваша відповідь: ");
-
             string ans3 = Console.ReadLine() ?? "1";
             if (ans3 == "1") { player.ChangeReputation(15); Console.WriteLine("✅ Фанати задоволені. (Слава +15)"); }
             else if (ans3 == "2") { player.ChangeReputation(25); Console.WriteLine("🧠 Журналісти відзначили ваш високий футбольний IQ. (Слава +25)"); }
@@ -141,6 +108,7 @@ namespace CareerSimulator.Domain.Events
             Console.WriteLine("\nПрес-аташе: 'На цьому все, дякуємо! Час готуватися до матчу.'");
             Console.WriteLine("Натисніть будь-яку клавішу, щоб вийти на поле...");
             Console.ReadKey();
+
         }
     }
 }

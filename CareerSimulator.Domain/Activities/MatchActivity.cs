@@ -22,9 +22,32 @@ namespace CareerSimulator.Domain.Activities
                 return;
             }
 
-            if (_random.Next(1, 101) <= 20)
+            if (player.MatchesThisWeek >= 2)
             {
-                CareerSimulator.Domain.Events.EventManager.TriggerPreMatchInterview(player);
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\n[!] Ліміт матчів! Ви вже зіграли 2 гри цього тижня. Гравцю потрібен Відпочинок.");
+                Console.ResetColor();
+                return;
+            }
+
+            if (_random.Next(1, 101) <= 15)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\n[ПРЕСКОНФЕРЕНЦІЯ] Журналісти запрошують вас на пресконференцію перед матчем.");
+                Console.ResetColor();
+                Console.WriteLine("1. Піти до преси і відповісти на питання");
+                Console.WriteLine("2. (Відмовитись) Зосередитись на розминці");
+                Console.Write("Ваш вибір: ");
+
+                string preMatchChoice = Console.ReadLine() ?? "2";
+                if (preMatchChoice == "1")
+                {
+                    CareerSimulator.Domain.Events.EventManager.TriggerPreMatchInterview(player);
+                }
+                else
+                {
+                    Console.WriteLine("Ви вирішили уникнути преси і зосередитись на майбутній грі.");
+                }
             }
 
             int matchCost = Math.Max(10, 40 - player.MatchDiscount);
@@ -37,6 +60,10 @@ namespace CareerSimulator.Domain.Activities
             Console.WriteLine($"\n=== МАТЧ: {player.CurrentClub.Name} ===");
 
             int winChance = 40 + (player.OverallRating / 2) + player.WinChanceBonus;
+
+            if (player.Morale >= 80) winChance += 10;
+            else if (player.Morale < 30) winChance -= 10;
+
             int roll = _random.Next(1, 101);
 
             bool isWin = roll <= winChance;
@@ -91,6 +118,8 @@ namespace CareerSimulator.Domain.Activities
 
             if (isWin)
             {
+                player.ChangeMorale(10);
+
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"ПЕРЕМОГА! {positionText}");
                 int earned = _random.Next(80, 150);
@@ -109,6 +138,8 @@ namespace CareerSimulator.Domain.Activities
             }
             else if (isDraw)
             {
+                player.ChangeMorale(-5);
+
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"НІЧИЯ. {positionText}");
                 int earned = _random.Next(30, 80);
@@ -123,6 +154,8 @@ namespace CareerSimulator.Domain.Activities
             }
             else
             {
+                player.ChangeMorale(-15);
+
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"ПОРАЗКА. {positionText}");
                 if (_random.Next(1, 100) <= 5)
@@ -144,6 +177,25 @@ namespace CareerSimulator.Domain.Activities
 
             player.Stats.RecordMatchStats(goals, assists, cleanSheets, penaltiesSaved);
             MedicalCenter.CheckForInjury(player, true);
+            if (_random.Next(1, 101) <= 15)
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\n[МІКС-ЗОНА] Журналісти з мікрофонами чекають на вас після матчу.");
+                Console.ResetColor();
+                Console.WriteLine("1. Підійти до преси і дати коментар");
+                Console.WriteLine("2. (Проігнорувати) Мовчки піти в роздягальню");
+                Console.Write("Ваш вибір: ");
+
+                string interviewChoice = Console.ReadLine() ?? "2";
+                if (interviewChoice == "1")
+                {
+                    CareerSimulator.Domain.Events.EventManager.TriggerPostMatchInterview(player, isWin, isDraw);
+                }
+                else
+                {
+                    Console.WriteLine("Ви пройшли повз журналістів у роздягальню.");
+                }
+            }
         }
     }
 }

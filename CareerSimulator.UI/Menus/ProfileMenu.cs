@@ -34,6 +34,24 @@ namespace CareerSimulator.UI.Menus
                 Console.ResetColor();
             }
 
+            Console.WriteLine("\n---------------- ПСИХОЛОГІЯ ----------------------");
+            Console.Write($"Мораль: {player.Morale}/100 ");
+            if (player.Morale >= 80)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("[КУРАЖ: +10% до перемоги]");
+            }
+            else if (player.Morale < 30)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[ДЕПРЕСІЯ: -10% до перемоги, енергія падає швидше!]");
+            }
+            else
+            {
+                Console.WriteLine("[СТАБІЛЬНО]");
+            }
+            Console.ResetColor();
+
             Console.WriteLine("\n---------------- СТАТИСТИКА ----------------------");
             Console.WriteLine($"Зіграно матчів: {player.Stats.TotalMatches}");
 

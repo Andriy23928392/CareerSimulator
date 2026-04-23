@@ -71,8 +71,6 @@ namespace CareerSimulator.Domain.Core
                 }
             }
 
-            CareerSimulator.Domain.Events.EventManager.TriggerWeeklyEvent(_player);
-
             var offer = CareerSimulator.Domain.Logic.TransferManager.CheckForTransferOffers(_player, CurrentDate);
             if (offer != null)
             {

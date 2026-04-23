@@ -59,14 +59,20 @@ namespace CareerSimulator.Domain.Core
                 }
             }
 
-            if (_player.Age >= 30 && CurrentDate.Month != oldDate.Month)
+            if (_player.Age >= 32 && CurrentDate.Month != oldDate.Month)
             {
-                int degradeChance = 30 + ((_player.Age - 30) * 5);
+                int degradeChance = 30 + ((_player.Age - 32) * 10);
+
                 if (new Random().Next(1, 101) <= degradeChance)
                 {
-                    _player.ChangeRating(-1);
+                    _player.Attributes.Pace -= 2;
+                    _player.Attributes.Physical -= 1;
+                    _player.Attributes.GK_Speed -= 2;
+
+                    if (new Random().Next(1, 100) <= 50) _player.Attributes.Dribbling -= 1;
+
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("\n[📉 СТАРІННЯ] Роки беруть своє... Ваш загальний рейтинг впав на 1.");
+                    Console.WriteLine($"\n[📉 ВІКОВІ ЗМІНИ] Ваш вік ({_player.Age}) дається взнаки. Ви втрачаєте швидкість та витривалість.");
                     Console.ResetColor();
                 }
             }
@@ -131,41 +137,90 @@ namespace CareerSimulator.Domain.Core
         public void SimulateYear()
         {
             Console.WriteLine("\n>>> Починаємо симуляцію ігрового року (52 тижні)...");
-
-            decimal moneyAtStart = _player.Money;
-            int ratingAtStart = _player.OverallRating;
-            int energySpent = 0;
+            int totalMatchesSimulated = 0;
 
             for (int i = 0; i < 52; i++)
             {
-                int energyCost = Math.Max(5, 30 - _player.TrainingDiscount);
-                if (_player.Energy >= energyCost)
+                if (!_player.IsInjured)
                 {
-                    _player.SpendEnergy(energyCost);
-                    int totalChance = 15 + (_player.TrainingChanceBonus / 2);
-                    if (_random.Next(1, 101) <= totalChance) { _player.ChangeRating(1); }
-                    energySpent += energyCost;
+                    int matchCost = Math.Max(10, 40 - _player.MatchDiscount);
+                    if (_player.Energy >= matchCost)
+                    {
+                        _player.SpendEnergy(matchCost);
+                        _player.AddMatchThisWeek();
+                        totalMatchesSimulated++;
+
+                        int winChance = 40 + (_player.OverallRating / 2) + _player.WinChanceBonus;
+                        if (_player.Morale >= 80) winChance += 10;
+                        else if (_player.Morale < 30) winChance -= 10;
+
+                        int roll = _random.Next(1, 101);
+                        bool isWin = roll <= winChance;
+                        bool isDraw = !isWin && roll <= winChance + 20;
+
+                        int goals = 0, assists = 0, cleanSheets = 0;
+                        if (isWin)
+                        {
+                            if (_player.PlayerPosition == Position.Forward) goals = _random.Next(1, 3);
+                            if (_player.PlayerPosition == Position.Midfielder) { goals = _random.Next(0, 2); assists = _random.Next(1, 3); }
+                            if (_player.PlayerPosition == Position.Defender || _player.PlayerPosition == Position.Goalkeeper) cleanSheets = 1;
+                        }
+
+                        _player.Stats.RecordMatchStats(goals, assists, cleanSheets, 0);
+
+                        if (isWin) { _player.ChangeMorale(10); _player.EarnMoney(100); }
+                        else if (isDraw) { _player.ChangeMorale(-5); _player.EarnMoney(50); }
+                        else { _player.ChangeMorale(-15); }
+
+                        if (_random.Next(1, 101) <= 4)
+                        {
+                            _player.SufferInjury("Мікротравма (Симуляція)", _random.Next(1, 4));
+                        }
+                    }
+
+                    int trainCost = Math.Max(5, 30 - _player.TrainingDiscount);
+                    if (_player.Energy >= trainCost && !_player.IsInjured)
+                    {
+                        _player.SpendEnergy(trainCost);
+                        _player.AddTrainingThisWeek();
+
+                        if (_player.PlayerPosition == Position.Goalkeeper)
+                        {
+                            int statToTrain = _random.Next(1, 7);
+                            if (statToTrain == 1) _player.Attributes.TryImprove(ref _player.Attributes.GK_Diving);
+                            else if (statToTrain == 2) _player.Attributes.TryImprove(ref _player.Attributes.GK_Reflexes);
+                            else if (statToTrain == 3) _player.Attributes.TryImprove(ref _player.Attributes.GK_Positioning);
+                            else if (statToTrain == 4) _player.Attributes.TryImprove(ref _player.Attributes.GK_Handling);
+                            else if (statToTrain == 5) _player.Attributes.TryImprove(ref _player.Attributes.GK_Kicking);
+                            else _player.Attributes.TryImprove(ref _player.Attributes.GK_Speed);
+                        }
+                        else
+                        {
+                            int statToTrain = _random.Next(1, 7);
+                            if (statToTrain == 1) _player.Attributes.TryImprove(ref _player.Attributes.Pace);
+                            else if (statToTrain == 2) _player.Attributes.TryImprove(ref _player.Attributes.Shooting);
+                            else if (statToTrain == 3) _player.Attributes.TryImprove(ref _player.Attributes.Passing);
+                            else if (statToTrain == 4) _player.Attributes.TryImprove(ref _player.Attributes.Physical);
+                            else if (statToTrain == 5) _player.Attributes.TryImprove(ref _player.Attributes.Dribbling);
+                            else
+                            {
+                                int defLimit = _player.PlayerPosition == Position.Forward ? 50 : (_player.PlayerPosition == Position.Midfielder ? 70 : 99);
+                                _player.Attributes.TryImprove(ref _player.Attributes.Defending, defLimit);
+                            }
+                        }
+                    }
                 }
-                else
+
+                if (_player.Energy < 30 && !_player.IsInjured)
                 {
-                    _player.RestoreEnergy(_player.MaxEnergy);
+                    _player.RestoreEnergy(100);
                 }
 
                 AdvanceTime();
             }
 
-            CareerSimulator.Domain.Infrastructure.SaveManager.SaveGame(_player, this);
-
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            Console.WriteLine("\n======================================");
-            Console.WriteLine("       РІЧНИЙ ЗВІТ СИМУЛЯЦІЇ         ");
-            Console.WriteLine("======================================");
-            Console.WriteLine($"Рейтинг: {ratingAtStart} -> {_player.OverallRating} (Ріст: +{_player.OverallRating - ratingAtStart})");
-            Console.WriteLine($"Баланс: {moneyAtStart}$ -> {_player.Money}$");
-            Console.WriteLine($"Чистий прибуток: {_player.Money - moneyAtStart}$");
-            Console.WriteLine($"Витрачено енергії на тренуваннях: {energySpent}");
-            Console.WriteLine($"Нова дата: {CurrentDate.ToString("dd MMMM yyyy")}");
-            Console.WriteLine("======================================\n");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"\n[+] Симуляцію завершено! Зіграно матчів за рік: {totalMatchesSimulated}");
             Console.ResetColor();
         }
 

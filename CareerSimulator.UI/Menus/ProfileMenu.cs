@@ -17,21 +17,27 @@ namespace CareerSimulator.UI.Menus
             Console.WriteLine($"Ім'я: {player.Name}");
             Console.WriteLine($"Вік: {player.Age} років (Пенсія очікується у {player.Stats.RetirementAge})");
             Console.WriteLine($"Позиція: {player.PlayerPosition}");
-            Console.WriteLine($"Поточний клуб: {player.CurrentClub.Name} (Зарплата: {player.CurrentClub.WeeklySalary}$)");
-            Console.WriteLine($"Рейтинг: {player.OverallRating} | Слава: {player.Reputation}");
-            Console.WriteLine($"Баланс: {player.Money}$");
+            Console.WriteLine($"Поточний клуб: {player.CurrentClub.Name}");
+            Console.WriteLine($"Зарплата: {player.CurrentClub.WeeklySalary}$ | Баланс: {player.Money}$");
 
-            if (player.IsInjured)
+            Console.WriteLine("\n--------------------------------------------------");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"  ЗАГАЛЬНИЙ РЕЙТИНГ (OVR): {player.OverallRating}");
+            Console.ResetColor();
+            Console.WriteLine("--------------------------------------------------");
+
+            Console.WriteLine("\nХАРАКТЕРИСТИКИ:");
+            if (player.PlayerPosition == Position.Goalkeeper)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine($"\n[ТРАВМА] {player.InjuryName} (Залишилось лікуватися: {player.WeeksInjured} тижнів)");
-                Console.ResetColor();
+                Console.WriteLine($"DIV (Стрибки):   {player.Attributes.GK_Diving,-3} | REF (Рефлекси): {player.Attributes.GK_Reflexes}");
+                Console.WriteLine($"HAN (Руки):      {player.Attributes.GK_Handling,-3} | POS (Позиція):  {player.Attributes.GK_Positioning}");
+                Console.WriteLine($"KIC (Вибивання): {player.Attributes.GK_Kicking,-3} | SPD (Швидкість): {player.Attributes.GK_Speed}");
             }
             else
             {
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("\n[ЗДОРОВ'Я] Гравець повністю здоровий.");
-                Console.ResetColor();
+                Console.WriteLine($"PAC (Швидкість): {player.Attributes.Pace,-3} | DRI (Дриблінг): {player.Attributes.Dribbling}");
+                Console.WriteLine($"SHO (Удари):     {player.Attributes.Shooting,-3} | DEF (Захист):   {player.Attributes.Defending}");
+                Console.WriteLine($"PAS (Паси):      {player.Attributes.Passing,-3} | PHY (Фізика):   {player.Attributes.Physical}");
             }
 
             Console.WriteLine("\n---------------- ПСИХОЛОГІЯ ----------------------");
@@ -52,32 +58,32 @@ namespace CareerSimulator.UI.Menus
             }
             Console.ResetColor();
 
-            Console.WriteLine("\n---------------- СТАТИСТИКА ----------------------");
-            Console.WriteLine($"Зіграно матчів: {player.Stats.TotalMatches}");
-
-            if (player.PlayerPosition == Position.Goalkeeper)
+            if (player.IsInjured)
             {
-                Console.WriteLine($"Сухі матчі (Кліншити): {player.Stats.TotalCleanSheets}");
-                Console.WriteLine($"Відбиті пенальті: {player.Stats.TotalPenaltiesSaved}");
-            }
-            else if (player.PlayerPosition == Position.Defender)
-            {
-                Console.WriteLine($"Голи: {player.Stats.TotalGoals}");
-                Console.WriteLine($"Асисти: {player.Stats.TotalAssists}");
-                Console.WriteLine($"Сухі матчі: {player.Stats.TotalCleanSheets}");
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n[ТРАВМА] {player.InjuryName} (Залишилось: {player.WeeksInjured} тижнів)");
+                Console.ResetColor();
             }
             else
             {
-                Console.WriteLine($"Голи: {player.Stats.TotalGoals}");
-                Console.WriteLine($"Асисти: {player.Stats.TotalAssists}");
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("\n[ЗДОРОВ'Я] Гравець у відмінній формі.");
+                Console.ResetColor();
             }
 
-            Console.WriteLine("\n---------------- АКТИВНІ БОНУСИ ------------------");
-            Console.WriteLine($"Макс. Енергія: {player.MaxEnergy}");
-            Console.WriteLine($"Шанс до рейтингу (Тренування): +{player.TrainingChanceBonus}%");
-            Console.WriteLine($"Шанс на перемогу (Матч): +{player.WinChanceBonus}%");
+            Console.WriteLine("\n---------------- СТАТИСТИКА ----------------------");
+            Console.WriteLine($"Зіграно матчів: {player.Stats.TotalMatches}");
+            Console.WriteLine($"Голи: {player.Stats.TotalGoals} | Асисти: {player.Stats.TotalAssists}");
+            if (player.PlayerPosition == Position.Goalkeeper || player.PlayerPosition == Position.Defender)
+            {
+                Console.WriteLine($"Сухі матчі: {player.Stats.TotalCleanSheets}");
+            }
 
-            Console.WriteLine("\nНатисніть будь-яку клавішу, щоб повернутися...");
+            Console.WriteLine("\n---------------- МОДИФІКАТОРИ --------------------");
+            Console.WriteLine($"Макс. Енергія: {player.MaxEnergy} | Слава: {player.Reputation}");
+            if (player.WinChanceBonus > 0) Console.WriteLine($"[+] Менталітет: +{player.WinChanceBonus}% до шансу перемоги");
+
+            Console.WriteLine("\nНатисніть будь-яку клавішу для виходу...");
             Console.ReadKey();
         }
     }

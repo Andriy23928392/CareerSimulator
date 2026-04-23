@@ -46,7 +46,6 @@ namespace CareerSimulator.Domain.Infrastructure
                 CurrentDate = timeManager.CurrentDate,
                 ClubName = player.CurrentClub.Name,
                 ClubSalary = player.CurrentClub.WeeklySalary,
-                GymLevel = player.GymLevel,
                 VillaLevel = player.VillaLevel,
                 GearLevel = player.GearLevel,
                 CryoLevel = player.CryoLevel,

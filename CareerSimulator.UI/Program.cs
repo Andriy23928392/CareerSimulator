@@ -105,7 +105,7 @@ namespace CareerSimulator.UI
                     case "1":
                         if (myPlayer.IsInjured) { Console.WriteLine("Ви травмовані! Треба відпочивати."); break; }
                         gameTime.ExecuteActivity(training);
-                        MedicalCenter.CheckForInjury(myPlayer, false);
+                        CareerSimulator.Domain.Services.MedicalCenter.CheckForInjury(myPlayer, false);
                         break;
                     case "2":
                         gameTime.ExecuteActivity(rest);
@@ -113,7 +113,7 @@ namespace CareerSimulator.UI
                     case "3":
                         if (myPlayer.IsInjured) { Console.WriteLine("Ви травмовані! Треба відпочивати."); break; }
                         gameTime.ExecuteActivity(match);
-                        MedicalCenter.CheckForInjury(myPlayer, false);
+                        CareerSimulator.Domain.Services.MedicalCenter.CheckForInjury(myPlayer, false);
                         break;
                     case "4":
                         StoreMenu.OpenStore(myPlayer);

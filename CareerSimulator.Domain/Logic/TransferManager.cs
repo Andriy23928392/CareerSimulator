@@ -9,32 +9,29 @@ namespace CareerSimulator.Domain.Logic
     {
         private static readonly Random _random = new Random();
 
-        // Основні клуби (УПЛ та Європа)
         private static readonly List<Club> _standardClubs = new List<Club>
         {
-            // Україна
             new Club("Нива (Тернопіль)", 50m, 25),
             new Club("Оболонь (Київ)", 180m, 45, 25),
             new Club("Полісся (Житомир)", 500m, 60, 50),
             new Club("Динамо (Київ)", 1000m, 70, 150),
             new Club("Шахтар (Донецьк)", 1200m, 73, 150),
 
-            // Європа (Різні рівні)
-            new Club("Галатасарай (Туреччина)", 1800m, 76, 500),
-            new Club("Бенфіка (Португалія)", 2200m, 78, 500),
-            new Club("Жирона (Іспанія)", 2500m, 80, 500),
+            new Club("Жирона (Іспанія)", 2000m, 76, 300),
+            new Club("Галатасарай (Туреччина)", 2500m, 78, 500),
+            new Club("Бенфіка (Португалія)", 2500m, 78, 500),
             new Club("Мілан (Італія)", 4000m, 84, 1000),
-            new Club("Ювентус (Італія)", 4500m, 85, 1000),
+            new Club("Ювентус (Італія)", 4000m, 85, 1000),
+            new Club("Атлетіко Мадрид", 5000m, 86, 1000),
             new Club("Челсі (Лондон)", 5000m, 86, 1000),
-            new Club("Манчестер Юнайтед", 6000m, 87, 1000),
-            new Club("Баварія (Мюнхен)", 7500m, 88, 2000),
+            new Club("Манчестер Юнайтед", 5000m, 87, 1000),
+            new Club("Баварія (Мюнхен)", 8000m, 88, 2000),
             new Club("Ліверпуль", 8000m, 89, 2000),
-            new Club("Манчестер Сіті", 9500m, 91, 2000),
-            new Club("ПСЖ", 10000m, 92, 2000),
-            new Club("Барселона", 11000m, 93, 2000)
+            new Club("Манчестер Сіті", 8000m, 91, 2000),
+            new Club("ПСЖ", 9000m, 92, 2000),
+            new Club("Барселона", 10000m, 93, 2000)
         };
 
-        // Клуби для завершення кар'єри (Тільки для гравців 34+ років)
         private static readonly List<Club> _veteranClubs = new List<Club>
         {
             new Club("Лос-Анджелес ФК (США)", 15000m, 75, 5000),
@@ -62,18 +59,22 @@ namespace CareerSimulator.Domain.Logic
             {
                 var veteranOffers = _veteranClubs
                     .Where(c => player.OverallRating >= c.RequiredRating
-                             && player.Reputation >= c.RequiredReputation 
+                             && player.Reputation >= c.RequiredReputation
                              && c.Name != player.CurrentClub.Name)
                     .ToList();
 
                 availableClubs.AddRange(veteranOffers);
             }
 
-            if (availableClubs.Count == 0) return null;
+            var betterClubs = availableClubs
+                .Where(c => c.WeeklySalary >= player.CurrentClub.WeeklySalary)
+                .ToList();
 
-            var bestOffer = availableClubs.OrderByDescending(c => c.WeeklySalary).First();
+            if (betterClubs.Count == 0) return null;
 
-            return bestOffer;
+            var potentialClub = betterClubs[_random.Next(betterClubs.Count)];
+
+            return potentialClub;
         }
     }
 }

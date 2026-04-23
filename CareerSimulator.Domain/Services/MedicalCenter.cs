@@ -1,7 +1,8 @@
 ﻿using System;
 using CareerSimulator.Domain.Models;
 
-namespace CareerSimulator.Domain.Core
+
+namespace CareerSimulator.Domain.Services
 {
     public static class MedicalCenter
     {
@@ -11,30 +12,54 @@ namespace CareerSimulator.Domain.Core
         {
             if (player.IsInjured) return;
 
-            int chance = isMatch ? 4 : 2;
+            // Шанс травмуватись вищий у матчі, ніж на тренуванні
+            int baseChance = isMatch ? 5 : 2; 
 
-            if (_random.Next(1, 101) <= chance)
+            if (_random.Next(1, 101) <= baseChance)
             {
                 int severityRoll = _random.Next(1, 101);
+                string name;
+                int weeks;
+                int moraleDrop;
 
-                if (severityRoll <= 70)
+                // Розподіл тяжкості травм
+                if (severityRoll <= 60) 
                 {
-                    player.SufferInjury("Перенавантаження м'язів", 2);
+                    // Легка травма (60%)
+                    name = "Забій гомілкостопу";
+                    weeks = _random.Next(1, 3);
+                    moraleDrop = 5;
                 }
-                else if (severityRoll <= 95)
+                else if (severityRoll <= 85) 
                 {
-                    player.SufferInjury("Травма коліна", _random.Next(8, 13));
+                    // Середня травма (25%)
+                    name = "Надрив м'язів стегна";
+                    weeks = _random.Next(3, 7);
+                    moraleDrop = 15;
                 }
-                else
+                else if (severityRoll <= 97) 
                 {
-                    player.SufferInjury("Розрив хрестоподібних зв'язок", _random.Next(28, 41));
+                    // Важка травма (12%)
+                    name = "Перелом плеснової кістки";
+                    weeks = _random.Next(8, 15);
+                    moraleDrop = 35;
                 }
+                else 
+                {
+                    // КАТАСТРОФА: "Хрести" (3%)
+                    name = "Розрив хрестоподібних зв'язок";
+                    weeks = _random.Next(24, 36); // Близько 6-8 місяців без футболу
+                    moraleDrop = 70; // Миттєва депресія
+                }
+
+                player.SufferInjury(name, weeks);
+                player.ChangeMorale(-moraleDrop);
 
                 Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\n==================================================");
-                Console.WriteLine($"🚑 ЖАХЛИВІ НОВИНИ! Ви отримали травму: {player.InjuryName}!");
-                Console.WriteLine($"Термін відновлення: {player.WeeksInjured} тижнів.");
-                Console.WriteLine("==================================================");
+                Console.WriteLine("\n[МЕДИЧНИЙ ЦЕНТР] ЖАХЛИВІ НОВИНИ!");
+                Console.WriteLine($"Ви отримали серйозну травму: {name}.");
+                Console.WriteLine($"Лікарі прогнозують, що ви пропустите {weeks} тижнів.");
+                Console.WriteLine($"Психологічний удар: Мораль впала на {moraleDrop} пунктів.");
                 Console.ResetColor();
             }
         }

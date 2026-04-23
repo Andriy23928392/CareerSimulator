@@ -1,7 +1,8 @@
-﻿using System;
+﻿using CareerSimulator.Domain.Core;
 using CareerSimulator.Domain.Interfaces;
 using CareerSimulator.Domain.Models;
-using CareerSimulator.Domain.Core;
+using CareerSimulator.Domain.Services;
+using System;
 
 namespace CareerSimulator.Domain.Activities
 {
@@ -22,15 +23,7 @@ namespace CareerSimulator.Domain.Activities
                 return;
             }
 
-            if (player.MatchesThisWeek >= 2)
-            {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\n[!] Ліміт матчів! Ви вже зіграли 2 гри цього тижня. Гравцю потрібен Відпочинок.");
-                Console.ResetColor();
-                return;
-            }
-
-            if (_random.Next(1, 101) <= 15)
+            if (_random.Next(1, 101) <= 20)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("\n[ПРЕСКОНФЕРЕНЦІЯ] Журналісти запрошують вас на пресконференцію перед матчем.");
@@ -40,14 +33,8 @@ namespace CareerSimulator.Domain.Activities
                 Console.Write("Ваш вибір: ");
 
                 string preMatchChoice = Console.ReadLine() ?? "2";
-                if (preMatchChoice == "1")
-                {
-                    CareerSimulator.Domain.Events.EventManager.TriggerPreMatchInterview(player);
-                }
-                else
-                {
-                    Console.WriteLine("Ви вирішили уникнути преси і зосередитись на майбутній грі.");
-                }
+                if (preMatchChoice == "1") CareerSimulator.Domain.Events.EventManager.TriggerPreMatchInterview(player);
+                else Console.WriteLine("Ви вирішили уникнути преси і зосередитись на майбутній грі.");
             }
 
             int matchCost = Math.Max(10, 40 - player.MatchDiscount);
@@ -78,18 +65,21 @@ namespace CareerSimulator.Domain.Activities
                 case Position.Goalkeeper:
                     if (isWin || isDraw)
                     {
-                        if (_random.Next(1, 100) <= 60) cleanSheets = 1;
-                        if (_random.Next(1, 100) <= 15) penaltiesSaved = 1;
+                        int cleanSheetChance = (player.Attributes.GK_Positioning + player.Attributes.GK_Reflexes) / 2;
+                        if (_random.Next(1, 101) <= cleanSheetChance) cleanSheets = 1;
+
+                        if (_random.Next(1, 101) <= (player.Attributes.GK_Diving / 3)) penaltiesSaved = 1;
                     }
-                    positionText = isWin ? "Ви здійснили кілька неймовірних сейвів!" :
+                    positionText = cleanSheets > 0 ? "Ви відстояли на нуль! Справжня стіна!" :
+                                   isWin ? "Команда виграла, хоча ви й пропустили." :
                                    isDraw ? "Надійна гра на лінії, але напад підвів." :
                                             "Ви пропустили кілька прикрих голів. Захист не допоміг.";
                     break;
 
                 case Position.Defender:
-                    if (isWin && _random.Next(1, 100) <= 5) goals = 1;
-                    if (_random.Next(1, 100) <= 10) assists = 1;
-                    if (isWin && _random.Next(1, 100) <= 50) cleanSheets = 1;
+                    if (isWin && _random.Next(1, 101) <= (player.Attributes.Physical / 5)) goals = 1;
+                    if (_random.Next(1, 101) <= (player.Attributes.Passing / 4)) assists = 1;
+                    if (isWin && _random.Next(1, 101) <= player.Attributes.Defending) cleanSheets = 1;
 
                     positionText = isWin ? "Ви забетонували свій фланг і не дали супернику шансів." :
                                    isDraw ? "Напружена гра в обороні без помилок." :
@@ -97,8 +87,8 @@ namespace CareerSimulator.Domain.Activities
                     break;
 
                 case Position.Midfielder:
-                    if (_random.Next(1, 100) <= 25) goals = _random.Next(0, 2);
-                    if (_random.Next(1, 100) <= 40) assists = _random.Next(0, 2);
+                    if (_random.Next(1, 101) <= (player.Attributes.Shooting / 2)) goals = _random.Next(1, 3);
+                    if (_random.Next(1, 101) <= (player.Attributes.Passing / 1.5)) assists = _random.Next(1, 3);
 
                     positionText = isWin ? "Ви домінували в центрі поля і диктували темп гри." :
                                    isDraw ? "Багато боротьби в центрі, але без результату." :
@@ -106,11 +96,19 @@ namespace CareerSimulator.Domain.Activities
                     break;
 
                 case Position.Forward:
-                    if (isWin) goals = _random.Next(1, 4);
-                    else if (isDraw) goals = _random.Next(0, 2);
-                    if (_random.Next(1, 100) <= 20) assists = 1;
+                    if (isWin)
+                    {
+                        if (player.Attributes.Shooting > 85) goals = _random.Next(2, 5); // Хет-трики для топів
+                        else if (player.Attributes.Shooting > 70) goals = _random.Next(1, 3);
+                        else goals = _random.Next(1, 2);
+                    }
 
-                    positionText = isWin ? "Ваш гольовий інстинкт приніс команді важливі очки!" :
+                    else if (isDraw && player.Attributes.Shooting > 60) goals = _random.Next(0, 2);
+
+                    if (_random.Next(1, 101) <= (player.Attributes.Passing / 3)) assists = 1;
+
+                    positionText = goals > 1 ? "Ваш гольовий інстинкт приніс команді перемогу!" :
+                                   goals == 1 ? "Ви забили важливий м'яч у цій грі." :
                                    isDraw ? "Ви мали моменти, але м'яч вперто не йшов у ворота." :
                                             "Захисники суперника повністю виключили вас з гри.";
                     break;
@@ -119,50 +117,26 @@ namespace CareerSimulator.Domain.Activities
             if (isWin)
             {
                 player.ChangeMorale(10);
-
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"ПЕРЕМОГА! {positionText}");
                 int earned = _random.Next(80, 150);
                 player.EarnMoney(earned);
                 Console.WriteLine($"💰 Зароблено за матч: {earned}$");
-
-                if (_random.Next(1, 100) <= 35)
-                {
-                    player.ChangeRating(1);
-                    Console.WriteLine("⬆️ Відмінна гра! Ви отримали досвід і ваш рейтинг зріс на +1!");
-                }
-                else
-                {
-                    Console.WriteLine("➡️ Ви зіграли круто, але досвіду для підвищення рейтингу поки замало.");
-                }
             }
             else if (isDraw)
             {
                 player.ChangeMorale(-5);
-
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"НІЧИЯ. {positionText}");
                 int earned = _random.Next(30, 80);
                 player.EarnMoney(earned);
                 Console.WriteLine($"💰 Зароблено за матч: {earned}$");
-
-                if (_random.Next(1, 100) <= 15)
-                {
-                    player.ChangeRating(1);
-                    Console.WriteLine("⬆️ Важка гра загартувала вас. Рейтинг зріс на +1!");
-                }
             }
             else
             {
                 player.ChangeMorale(-15);
-
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"ПОРАЗКА. {positionText}");
-                if (_random.Next(1, 100) <= 5)
-                {
-                    player.ChangeRating(-1);
-                    Console.WriteLine("⬇️ Через жахливу гру та критику фанатів ваш рейтинг впав на 1.");
-                }
             }
             Console.ResetColor();
 
@@ -176,8 +150,8 @@ namespace CareerSimulator.Domain.Activities
             }
 
             player.Stats.RecordMatchStats(goals, assists, cleanSheets, penaltiesSaved);
-            MedicalCenter.CheckForInjury(player, true);
-            if (_random.Next(1, 101) <= 15)
+
+            if (_random.Next(1, 101) <= 20)
             {
                 Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("\n[МІКС-ЗОНА] Журналісти з мікрофонами чекають на вас після матчу.");
@@ -186,16 +160,9 @@ namespace CareerSimulator.Domain.Activities
                 Console.WriteLine("2. (Проігнорувати) Мовчки піти в роздягальню");
                 Console.Write("Ваш вибір: ");
 
-                string interviewChoice = Console.ReadLine() ?? "2";
-                if (interviewChoice == "1")
-                {
-                    CareerSimulator.Domain.Events.EventManager.TriggerPostMatchInterview(player, isWin, isDraw);
-                }
-                else
-                {
-                    Console.WriteLine("Ви пройшли повз журналістів у роздягальню.");
-                }
+                if ((Console.ReadLine() ?? "2") == "1") CareerSimulator.Domain.Events.EventManager.TriggerPostMatchInterview(player, isWin, isDraw);
             }
+            MedicalCenter.CheckForInjury(player, true);
         }
     }
 }

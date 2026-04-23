@@ -2,25 +2,38 @@
 
 namespace CareerSimulator.Domain.Models
 {
-    public enum Position
-    {
-        Goalkeeper,
-        Defender,
-        Midfielder,
-        Forward
-    }
-
     public class Player
     {
         public string Name { get; private set; }
         public Position PlayerPosition { get; private set; }
 
-        // Базові характеристики
+        public PlayerAttributes Attributes { get; private set; } = new PlayerAttributes();
+
+        public int OverallRating
+        {
+            get
+            {
+                if (PlayerPosition == Position.Goalkeeper)
+                {
+                    return (int)(Attributes.GK_Diving * 0.2 + Attributes.GK_Reflexes * 0.2 +
+                                 Attributes.GK_Handling * 0.2 + Attributes.GK_Positioning * 0.2 +
+                                 Attributes.GK_Kicking * 0.1 + Attributes.GK_Speed * 0.1);
+                }
+
+                return PlayerPosition switch
+                {
+                    Position.Forward => (int)(Attributes.Shooting * 0.45 + Attributes.Pace * 0.2 + Attributes.Dribbling * 0.15 + Attributes.Passing * 0.1 + Attributes.Physical * 0.1),
+                    Position.Midfielder => (int)(Attributes.Passing * 0.4 + Attributes.Dribbling * 0.25 + Attributes.Shooting * 0.15 + Attributes.Pace * 0.1 + Attributes.Physical * 0.1),
+                    Position.Defender => (int)(Attributes.Defending * 0.5 + Attributes.Physical * 0.25 + Attributes.Pace * 0.15 + Attributes.Passing * 0.1),
+                    _ => 50
+                };
+            }
+        }
+
         public int Reputation { get; private set; } = 0;
         public int Energy { get; private set; }
         public Club CurrentClub { get; private set; }
         public decimal Money { get; private set; }
-        public int OverallRating { get; private set; }
         public int Age { get; private set; }
         public int MatchesThisWeek { get; private set; } = 0;
         public int TrainingsThisWeek { get; private set; } = 0;
@@ -31,25 +44,21 @@ namespace CareerSimulator.Domain.Models
         public PlayerStats Stats { get; private set; } = new PlayerStats();
         public PlayerUpgrades Upgrades { get; private set; } = new PlayerUpgrades();
 
-        // Динамічна властивість (рахується автоматично)
         public int MaxEnergy => 100 + Upgrades.MaxEnergyBonus;
 
-        public int TrainingChanceBonus => Upgrades.TrainingChanceBonus;
         public int TrainingDiscount => Upgrades.TrainingDiscount;
         public int MatchDiscount => Upgrades.MatchDiscount;
         public int WinChanceBonus => Upgrades.WinChanceBonus;
 
-        public int GymLevel => Upgrades.GymLevel;
         public int VillaLevel => Upgrades.VillaLevel;
         public int GearLevel => Upgrades.GearLevel;
         public int CryoLevel => Upgrades.CryoLevel;
         public int MentalLevel => Upgrades.MentalLevel;
-        // --- ТРАВМИ ---
+
         public bool IsInjured => WeeksInjured > 0;
         public int WeeksInjured { get; private set; } = 0;
         public string InjuryName { get; private set; } = "";
 
-        public void UpgradeGym() => Upgrades.UpgradeGym();
         public void UpgradeVilla() { Upgrades.UpgradeVilla(); RestoreEnergy(MaxEnergy); }
         public void UpgradeGear() => Upgrades.UpgradeGear();
         public void UpgradeCryo() => Upgrades.UpgradeCryo();
@@ -64,9 +73,9 @@ namespace CareerSimulator.Domain.Models
             PlayerPosition = position;
             Energy = 100;
             Money = 500m;
-            OverallRating = 40;
-            Age = 18;
+            Age = 16;
             CurrentClub = new Club("ФК Збірна Університету", 0m, 10);
+
         }
 
         public void SpendEnergy(int amount)
@@ -110,8 +119,19 @@ namespace CareerSimulator.Domain.Models
 
         public void ChangeRating(int delta)
         {
-            OverallRating += delta;
-            if (OverallRating < 1) OverallRating = 1;
+            Attributes.Pace += delta;
+            Attributes.Shooting += delta;
+            Attributes.Passing += delta;
+            Attributes.Dribbling += delta;
+            Attributes.Defending += delta;
+            Attributes.Physical += delta;
+
+            Attributes.GK_Diving += delta;
+            Attributes.GK_Handling += delta;
+            Attributes.GK_Kicking += delta;
+            Attributes.GK_Reflexes += delta;
+            Attributes.GK_Speed += delta;
+            Attributes.GK_Positioning += delta;
         }
 
         public void ChangeReputation(int amount)
@@ -137,13 +157,20 @@ namespace CareerSimulator.Domain.Models
             Age = age;
             Energy = energy;
             Money = money;
-            OverallRating = rating;
+
+            Attributes.Pace = 0; Attributes.Shooting = 0; Attributes.Passing = 0;
+            Attributes.Dribbling = 0; Attributes.Defending = 0; Attributes.Physical = 0;
+            Attributes.GK_Diving = 0; Attributes.GK_Handling = 0; Attributes.GK_Kicking = 0;
+            Attributes.GK_Reflexes = 0; Attributes.GK_Speed = 0; Attributes.GK_Positioning = 0;
+            ChangeRating(rating);
+
             CurrentClub = new Club(clubName, clubSalary, 0);
             Reputation = reputation;
 
             Stats.LoadStats(totalMatches, retirementAge);
             Upgrades.LoadUpgrades(gymLvl, villaLvl, gearLvl, cryoLvl, mentalLvl);
         }
+
         public void SufferInjury(string name, int durationInWeeks)
         {
             WeeksInjured = durationInWeeks;
@@ -159,11 +186,13 @@ namespace CareerSimulator.Domain.Models
                 if (WeeksInjured == 0) InjuryName = "";
             }
         }
+
         public void ResetWeeklyLimits()
         {
             MatchesThisWeek = 0;
             TrainingsThisWeek = 0;
         }
+
         public void ChangeMorale(int amount)
         {
             Morale += amount;

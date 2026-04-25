@@ -54,6 +54,7 @@ namespace CareerSimulator.Domain.Models
         public int GearLevel => Upgrades.GearLevel;
         public int CryoLevel => Upgrades.CryoLevel;
         public int MentalLevel => Upgrades.MentalLevel;
+        public int CoachTrust { get; private set; } = 50;
 
         public bool IsInjured => WeeksInjured > 0;
         public int WeeksInjured { get; private set; } = 0;
@@ -77,13 +78,18 @@ namespace CareerSimulator.Domain.Models
             CurrentClub = new Club("ФК Збірна Університету", 0m, 10);
 
         }
-
-        public void SpendEnergy(int amount)
+        public int CalculateEnergyCost(int baseCost)
         {
             if (Morale < 30)
             {
-                amount = (int)(amount * 1.5);
+                return (int)(baseCost * 1.5);
             }
+            return baseCost;
+        }
+
+        public void SpendEnergy(int baseCost)
+        {
+            int amount = CalculateEnergyCost(baseCost);
 
             if (Energy >= amount)
             {
@@ -91,7 +97,7 @@ namespace CareerSimulator.Domain.Models
             }
             else
             {
-                throw new Exception("Недостатньо енергії!");
+                throw new Exception($"Недостатньо енергії! (Потрібно: {amount}, є: {Energy})");
             }
         }
 
@@ -199,5 +205,12 @@ namespace CareerSimulator.Domain.Models
             if (Morale > 100) Morale = 100;
             if (Morale < 0) Morale = 0;
         }
+        public void ChangeCoachTrust(int amount)
+        {
+            CoachTrust += amount;
+            if (CoachTrust > 100) CoachTrust = 100;
+            if (CoachTrust < 0) CoachTrust = 0;
+        }
+
     }
 }

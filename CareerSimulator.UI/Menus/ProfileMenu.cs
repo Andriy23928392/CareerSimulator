@@ -58,6 +58,23 @@ namespace CareerSimulator.UI.Menus
             }
             Console.ResetColor();
 
+            Console.Write($"Довіра тренера: {player.CoachTrust}/100 ");
+            if (player.CoachTrust < 30)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("[КРИТИЧНО: Вас можуть вигнати!]");
+            }
+            else if (player.CoachTrust >= 80)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("[УЛЮБЛЕНЕЦЬ: Ви лідер команди]");
+            }
+            else
+            {
+                Console.WriteLine("[СТАБІЛЬНО]");
+            }
+            Console.ResetColor();
+
             if (player.IsInjured)
             {
                 Console.ForegroundColor = ConsoleColor.Red;

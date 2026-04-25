@@ -69,13 +69,23 @@ namespace CareerSimulator.UI
 
             while (isRunning)
             {
-                int actualTrainingCost = Math.Max(5, 30 - myPlayer.TrainingDiscount);
-                int actualMatchCost = Math.Max(10, 40 - myPlayer.MatchDiscount);
+                int baseTrainingCost = Math.Max(5, 30 - myPlayer.TrainingDiscount);
+                int baseMatchCost = Math.Max(10, 40 - myPlayer.MatchDiscount);
+                int actualTrainingCost = myPlayer.CalculateEnergyCost(baseTrainingCost);
+                int actualMatchCost = myPlayer.CalculateEnergyCost(baseMatchCost);
 
                 Console.WriteLine("\n==============================");
                 Console.WriteLine($"Статус: {myPlayer.Name} ({myPlayer.Age} років) | {myPlayer.PlayerPosition} | {myPlayer.CurrentClub.Name}"); Console.WriteLine($"Енергія: {myPlayer.Energy} | Гроші: {myPlayer.Money}$ | Рейтинг: {myPlayer.OverallRating}");
+                Console.WriteLine($"Довіра тренера: {myPlayer.CoachTrust}/100");
                 Console.WriteLine($"Дата: {gameTime.CurrentDate.ToString("dd.MM.yyyy")}");
                 Console.WriteLine("==============================");
+
+                if (myPlayer.Morale < 30)
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("⚠️ ДЕПРЕСІЯ: Ви виснажені емоційно! Всі дії забирають на 50% більше енергії!");
+                    Console.ResetColor();
+                }
 
                 if (myPlayer.IsInjured)
                 {

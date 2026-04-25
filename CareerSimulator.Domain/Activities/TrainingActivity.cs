@@ -98,6 +98,7 @@ namespace CareerSimulator.Domain.Activities
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("\n[+] Відмінне тренування! Характеристики зросли.");
                 Console.WriteLine($"Поточний Загальний Рейтинг (OVR): {player.OverallRating}");
+                player.ChangeCoachTrust(2);
             }
             else
             {

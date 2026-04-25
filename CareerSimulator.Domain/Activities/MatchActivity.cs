@@ -36,6 +36,14 @@ namespace CareerSimulator.Domain.Activities
                 if (preMatchChoice == "1") CareerSimulator.Domain.Events.EventManager.TriggerPreMatchInterview(player);
                 else Console.WriteLine("Ви вирішили уникнути преси і зосередитись на майбутній грі.");
             }
+            if (player.CoachTrust < 20)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("\n[РІШЕННЯ ТРЕНЕРА] Тренер не довіряє вам і залишає на лаві запасних на матч.");
+                Console.WriteLine("Вам потрібно повернути його довіру на тренуваннях!");
+                Console.ResetColor();
+                return;
+            }
 
             int matchCost = Math.Max(10, 40 - player.MatchDiscount);
             try { player.SpendEnergy(matchCost); }
@@ -122,6 +130,7 @@ namespace CareerSimulator.Domain.Activities
                 int earned = _random.Next(80, 150);
                 player.EarnMoney(earned);
                 Console.WriteLine($"💰 Зароблено за матч: {earned}$");
+                player.ChangeCoachTrust(5);
             }
             else if (isDraw)
             {
@@ -131,12 +140,14 @@ namespace CareerSimulator.Domain.Activities
                 int earned = _random.Next(30, 80);
                 player.EarnMoney(earned);
                 Console.WriteLine($"💰 Зароблено за матч: {earned}$");
+                player.ChangeCoachTrust(0);
             }
             else
             {
                 player.ChangeMorale(-15);
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"ПОРАЗКА. {positionText}");
+                player.ChangeCoachTrust(-5);
             }
             Console.ResetColor();
 

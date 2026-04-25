@@ -110,23 +110,43 @@ namespace CareerSimulator.UI.Menus
                 {
                     if (choice == "1")
                     {
-                        if (player.VillaLevel >= 5) { Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue; }
-                        player.SpendMoney(villaPrice); player.UpgradeVilla(); Console.WriteLine("\n[+] Успішно! Ви розширили Віллу.");
+                        if (player.VillaLevel >= 5)
+                        { 
+                            Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue;
+                        }
+                        player.SpendMoney(villaPrice);
+                        player.UpgradeVilla();
+                        Console.WriteLine("\n[+] Успішно! Ви розширили Віллу.");
                     }
                     else if (choice == "2")
                     {
-                        if (player.GearLevel >= 5) { Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue; }
-                        player.SpendMoney(gearPrice); player.UpgradeGear(); Console.WriteLine("\n[+] Успішно! Ви оновили екіпірування.");
+                        if (player.GearLevel >= 5)
+                        {
+                            Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue;
+                        }
+                        player.SpendMoney(gearPrice);
+                        player.UpgradeGear();
+                        Console.WriteLine("\n[+] Успішно! Ви оновили екіпірування.");
                     }
                     else if (choice == "3")
                     {
-                        if (player.CryoLevel >= 5) { Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue; }
-                        player.SpendMoney(cryoPrice); player.UpgradeCryo(); Console.WriteLine("\n[+] Успішно! Ви купили кріокамеру.");
+                        if (player.CryoLevel >= 5) 
+                        {
+                            Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue;
+                        }
+                        player.SpendMoney(cryoPrice);
+                        player.UpgradeCryo();
+                        Console.WriteLine("\n[+] Успішно! Ви купили кріокамеру.");
                     }
                     else if (choice == "4")
                     {
-                        if (player.MentalLevel >= 5) { Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue; }
-                        player.SpendMoney(mentalPrice); player.UpgradeMental(); Console.WriteLine("\n[+] Успішно! Ви найняли психолога.");
+                        if (player.MentalLevel >= 5) 
+                        {
+                            Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue;
+                        }
+                        player.SpendMoney(mentalPrice);
+                        player.UpgradeMental();
+                        Console.WriteLine("\n[+] Успішно! Ви найняли психолога.");
                     }
                 }
                 catch (Exception ex)

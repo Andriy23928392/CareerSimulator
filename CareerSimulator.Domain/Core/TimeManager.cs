@@ -35,15 +35,41 @@ namespace CareerSimulator.Domain.Core
             DateTime oldDate = CurrentDate;
             CurrentDate = CurrentDate.AddDays(7);
 
-            // 1. ОНОВЛЕННЯ ЛІМІТІВ ТА ЗДОРОВ'Я
+            if (_player.TrainingsThisWeek == 0 && !_player.IsInjured)
+            {
+                _player.ChangeCoachTrust(-10);
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("\n[ТРЕНЕР] Ви не з'явилися на жодне тренування цього тижня!");
+                Console.WriteLine("Довіра тренера падає (-10).");
+                Console.ResetColor();
+            }
+
             _player.ResetWeeklyLimits();
             _player.HealOneWeek();
 
-            // 2. ФІНАНСИ
             if (_player.CurrentClub.WeeklySalary > 0)
                 _player.EarnMoney(_player.CurrentClub.WeeklySalary);
             if (_player.SponsorIncome > 0)
                 _player.EarnMoney(_player.SponsorIncome);
+
+            if (_player.CoachTrust == 0)
+            {
+                Console.Clear();
+                Console.BackgroundColor = ConsoleColor.DarkRed;
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("\n[СКАДАЛ!] Тренеру увірвався терпець! Ваш контракт розірвано.");
+                Console.ResetColor();
+
+                var newClub = CareerSimulator.Domain.Logic.TransferManager.GetEmergencyTransfer(_player);
+                _player.SignContract(newClub);
+                _player.ChangeCoachTrust(50); 
+                _player.ChangeMorale(-30);    
+
+                Console.WriteLine($"Ваш агент терміново знайшов вам нову команду: {newClub.Name}.");
+                Console.WriteLine($"Зарплата тепер: {newClub.WeeklySalary}$. Мораль різко впала.");
+                Console.WriteLine("Натисніть будь-яку клавішу...");
+                Console.ReadKey();
+            }
 
             if (CurrentDate.Year > oldDate.Year)
             {
@@ -143,10 +169,12 @@ namespace CareerSimulator.Domain.Core
             {
                 if (!_player.IsInjured)
                 {
-                    int matchCost = Math.Max(10, 40 - _player.MatchDiscount);
-                    if (_player.Energy >= matchCost)
+                    int baseMatchCost = Math.Max(10, 40 - _player.MatchDiscount);
+                    int actualMatchCost = _player.CalculateEnergyCost(baseMatchCost);
+
+                    if (_player.Energy >= actualMatchCost)
                     {
-                        _player.SpendEnergy(matchCost);
+                        _player.SpendEnergy(baseMatchCost);
                         _player.AddMatchThisWeek();
                         totalMatchesSimulated++;
 
@@ -178,10 +206,12 @@ namespace CareerSimulator.Domain.Core
                         }
                     }
 
-                    int trainCost = Math.Max(5, 30 - _player.TrainingDiscount);
-                    if (_player.Energy >= trainCost && !_player.IsInjured)
+                    int baseTrainCost = Math.Max(5, 30 - _player.TrainingDiscount);
+                    int actualTrainCost = _player.CalculateEnergyCost(baseTrainCost);
+
+                    if (_player.Energy >= actualTrainCost && !_player.IsInjured)
                     {
-                        _player.SpendEnergy(trainCost);
+                        _player.SpendEnergy(baseTrainCost);
                         _player.AddTrainingThisWeek();
 
                         if (_player.PlayerPosition == Position.Goalkeeper)

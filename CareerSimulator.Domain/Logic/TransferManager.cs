@@ -76,5 +76,19 @@ namespace CareerSimulator.Domain.Logic
 
             return potentialClub;
         }
+        public static Club GetEmergencyTransfer(Player player)
+        {
+            var available = _standardClubs
+                .Where(c => c.RequiredRating <= player.OverallRating &&
+                            c.RequiredRating >= player.OverallRating - 10 &&
+                            c.Name != player.CurrentClub.Name)
+                .OrderByDescending(c => c.RequiredRating)
+                .ToList();
+
+            if (available.Count > 0)
+                return available[0];
+
+            return _standardClubs[0];
+        }
     }
 }

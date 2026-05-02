@@ -6,14 +6,30 @@ using System;
 
 namespace CareerSimulator.Domain.Activities
 {
+    public enum MatchType
+    {
+        League,          
+        ChampionsLeague, 
+        Cup             
+    }
+
+    public enum MatchLocation
+    {
+        Home,    
+        Away,    
+        Neutral  
+    }
     public class MatchActivity : IActivity
     {
         public string Name => "Зіграти матч";
         public string Description => "Провести офіційний матч за свій клуб";
 
         private static Random _random = new Random();
-
         public void Execute(Player player)
+        {
+        }
+
+        public void Execute(Player player, TimeManager timeManager, MatchType matchType, MatchLocation location)
         {
             if (player.MatchesThisWeek >= 2)
             {
@@ -45,16 +61,46 @@ namespace CareerSimulator.Domain.Activities
                 return;
             }
 
-            int matchCost = Math.Max(10, 40 - player.MatchDiscount);
-            try { player.SpendEnergy(matchCost); }
-            catch (Exception ex) { Console.WriteLine(ex.Message); return; }
-
-            player.AddMatchThisWeek();
-
-            Console.Clear();
-            Console.WriteLine($"\n=== МАТЧ: {player.CurrentClub.Name} ===");
+            int baseEnergyCost = Math.Max(10, 40 - player.MatchDiscount);
+            int actualEnergyCost = player.CalculateEnergyCost(baseEnergyCost); 
 
             int winChance = 40 + (player.OverallRating / 2) + player.WinChanceBonus;
+
+            Console.Clear();
+            Console.WriteLine($"\n=== МАТЧ: {player.CurrentClub.Name} ({matchType.ToString().ToUpper()}) ===");
+
+            if (location == MatchLocation.Home)
+            {
+                winChance += 5;
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("🏟 Домашній матч: Рідні трибуни женуть вас вперед! (+10% до перемоги)");
+                Console.ResetColor();
+            }
+            else if (location == MatchLocation.Away)
+            {
+                winChance -= 5; 
+                actualEnergyCost += 10;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("🚌 Виїзний матч: Важкий переїзд і тиск чужих фанатів! (-5% шанс, +10 витрата енергії)");
+                Console.ResetColor();
+            }
+            else if (location == MatchLocation.Neutral)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine("🏟 Нейтральне поле: Рівні умови для обох команд.");
+                Console.ResetColor();
+            }
+
+            try { player.SpendEnergy(actualEnergyCost); }
+            catch (Exception ex)
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\n[МЕДИЧНИЙ ШТАБ] Ви занадто виснажені для цього матчу! (Потрібно: {actualEnergyCost}, Є: {player.Energy})");
+                Console.ResetColor();
+                return; 
+            }
+
+            player.AddMatchThisWeek();
 
             if (player.Morale >= 80) winChance += 10;
             else if (player.Morale < 30) winChance -= 10;

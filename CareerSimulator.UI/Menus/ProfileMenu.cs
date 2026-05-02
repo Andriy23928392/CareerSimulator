@@ -15,6 +15,7 @@ namespace CareerSimulator.UI.Menus
             Console.ResetColor();
 
             Console.WriteLine($"Ім'я: {player.Name}");
+            Console.WriteLine($"Національність: {player.Nationality}");
             Console.WriteLine($"Вік: {player.Age} років (Пенсія очікується у {player.Stats.RetirementAge})");
             Console.WriteLine($"Позиція: {player.PlayerPosition}");
             Console.WriteLine($"Поточний клуб: {player.CurrentClub.Name}");
@@ -89,6 +90,20 @@ namespace CareerSimulator.UI.Menus
             }
 
             Console.WriteLine("\n---------------- СТАТИСТИКА ----------------------");
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("ПОТОЧНИЙ СЕЗОН:");
+            Console.ResetColor();
+            Console.WriteLine($"Матчів: {player.Stats.SeasonMatches}");
+            Console.WriteLine($"Голи: {player.Stats.SeasonGoals} | Асисти: {player.Stats.SeasonAssists}");
+            if (player.PlayerPosition == Position.Goalkeeper || player.PlayerPosition == Position.Defender)
+            {
+                Console.WriteLine($"Сухі матчі: {player.Stats.SeasonCleanSheets}");
+            }
+
+            Console.WriteLine();
+            Console.ForegroundColor = ConsoleColor.DarkGray;
+            Console.WriteLine("ЗА ВСЮ КАР'ЄРУ:");
+            Console.ResetColor();
             Console.WriteLine($"Зіграно матчів: {player.Stats.TotalMatches}");
             Console.WriteLine($"Голи: {player.Stats.TotalGoals} | Асисти: {player.Stats.TotalAssists}");
             if (player.PlayerPosition == Position.Goalkeeper || player.PlayerPosition == Position.Defender)

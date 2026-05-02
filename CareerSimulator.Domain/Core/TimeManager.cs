@@ -62,8 +62,8 @@ namespace CareerSimulator.Domain.Core
 
                 var newClub = CareerSimulator.Domain.Logic.TransferManager.GetEmergencyTransfer(_player);
                 _player.SignContract(newClub);
-                _player.ChangeCoachTrust(50); 
-                _player.ChangeMorale(-30);    
+                _player.ChangeCoachTrust(50);
+                _player.ChangeMorale(-30);
 
                 Console.WriteLine($"Ваш агент терміново знайшов вам нову команду: {newClub.Name}.");
                 Console.WriteLine($"Зарплата тепер: {newClub.WeeklySalary}$. Мораль різко впала.");
@@ -74,9 +74,19 @@ namespace CareerSimulator.Domain.Core
             if (CurrentDate.Year > oldDate.Year)
             {
                 _player.SetAge(_player.Age + 1);
+
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\n==================================================");
+                Console.WriteLine($"🏆 СЕЗОН {oldDate.Year} ЗАВЕРШЕНО! ПОЧАТОК НОВОГО СЕЗОНУ.");
+                Console.WriteLine("==================================================");
+
                 Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine($"\n🎂 З днем народження! Вам тепер {_player.Age} років.");
+                Console.WriteLine($"🎂 З днем народження! Вам тепер {_player.Age} років.");
                 Console.ResetColor();
+
+                // Обнуляємо сезонну статистику
+                _player.Stats.ResetSeasonStats();
+                Console.WriteLine("[!] Сезонну статистику обнулено. Час підкорювати нові вершини!");
 
                 if (_player.Age >= _player.Stats.RetirementAge)
                 {

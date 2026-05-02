@@ -122,9 +122,11 @@ namespace CareerSimulator.UI
                         break;
                     case "3":
                         if (myPlayer.IsInjured) { Console.WriteLine("Ви травмовані! Треба відпочивати."); break; }
-                        gameTime.ExecuteActivity(match);
+                        Random rnd = new Random();
+                        CareerSimulator.Domain.Activities.MatchLocation randomLocation = (CareerSimulator.Domain.Activities.MatchLocation)rnd.Next(0, 2);
+                        match.Execute(myPlayer, gameTime, CareerSimulator.Domain.Activities.MatchType.League, randomLocation);
                         CareerSimulator.Domain.Services.MedicalCenter.CheckForInjury(myPlayer, false);
-                        break;
+                        break; ;
                     case "4":
                         StoreMenu.OpenStore(myPlayer);
                         break;

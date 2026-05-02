@@ -40,6 +40,7 @@ namespace CareerSimulator.Domain.Models
         public int Morale { get; private set; } = 60;
 
         public int SponsorIncome { get; private set; } = 0;
+        public string Nationality { get; set; } = "Україна";
         public string SponsorName { get; private set; } = "Немає";
         public PlayerStats Stats { get; private set; } = new PlayerStats();
         public PlayerUpgrades Upgrades { get; private set; } = new PlayerUpgrades();

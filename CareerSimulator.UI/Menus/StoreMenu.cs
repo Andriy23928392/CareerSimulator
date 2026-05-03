@@ -79,27 +79,26 @@ namespace CareerSimulator.UI.Menus
         {
             while (true)
             {
-                Console.Clear(); 
+                Console.Clear();
                 Console.WriteLine("\n=== VIP АГЕНТСТВО 'LUXURY LIFE' ===");
                 Console.WriteLine($"Ваш баланс: {player.Money}$");
                 Console.WriteLine($"Знижка Тренування: -{player.TrainingDiscount} | Знижка Матчу: -{player.MatchDiscount}");
-                Console.WriteLine($"Макс. Енергія: {player.MaxEnergy} | Воля до перемоги: +{player.WinChanceBonus}%");
+                Console.WriteLine($"Макс. Енергія: {player.MaxEnergy} | Бонус тренувань: +{player.TrainingBonus}%");
                 Console.WriteLine("-----------------------------------");
 
                 decimal villaPrice = 5000m * (player.VillaLevel + 1) * (player.VillaLevel + 1);
                 decimal gearPrice = 3000m * (player.GearLevel + 1) * (player.GearLevel + 1);
                 decimal cryoPrice = 3500m * (player.CryoLevel + 1) * (player.CryoLevel + 1);
-                decimal mentalPrice = 6000m * (player.MentalLevel + 1) * (player.MentalLevel + 1);
-
+                decimal coachPrice = 6000m * (player.CoachLevel + 1) * (player.CoachLevel + 1);
                 string villaStatus = player.VillaLevel >= 5 ? "[МАКСИМУМ]" : $"{villaPrice}$";
                 string gearStatus = player.GearLevel >= 5 ? "[МАКСИМУМ]" : $"{gearPrice}$";
                 string cryoStatus = player.CryoLevel >= 5 ? "[МАКСИМУМ]" : $"{cryoPrice}$";
-                string mentalStatus = player.MentalLevel >= 5 ? "[МАКСИМУМ]" : $"{mentalPrice}$";
+                string coachStatus = player.CoachLevel >= 5 ? "[МАКСИМУМ]" : $"{coachPrice}$";
 
                 Console.WriteLine($"1. Елітна Вілла (Рівень {player.VillaLevel}/5) - +20 Макс. Енергії | Ціна: {villaStatus}");
                 Console.WriteLine($"2. VIP-Екіпірування (Рівень {player.GearLevel}/5) - -2 енергії на тренування | Ціна: {gearStatus}");
                 Console.WriteLine($"3. Домашня Кріокамера (Рівень {player.CryoLevel}/5) - -2 енергії на матч | Ціна: {cryoStatus}");
-                Console.WriteLine($"4. Спортивний психолог (Рівень {player.MentalLevel}/5) - +2% шансу перемоги | Ціна: {mentalStatus}");
+                Console.WriteLine($"4. Персональний тренер (Рівень {player.CoachLevel}/5) - +2% до шансу прокачки | Ціна: {coachStatus}");
                 Console.WriteLine("0. Повернутися в меню");
                 Console.Write("Ваш вибір: ");
 
@@ -111,7 +110,7 @@ namespace CareerSimulator.UI.Menus
                     if (choice == "1")
                     {
                         if (player.VillaLevel >= 5)
-                        { 
+                        {
                             Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue;
                         }
                         player.SpendMoney(villaPrice);
@@ -130,7 +129,7 @@ namespace CareerSimulator.UI.Menus
                     }
                     else if (choice == "3")
                     {
-                        if (player.CryoLevel >= 5) 
+                        if (player.CryoLevel >= 5)
                         {
                             Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue;
                         }
@@ -138,27 +137,35 @@ namespace CareerSimulator.UI.Menus
                         player.UpgradeCryo();
                         Console.WriteLine("\n[+] Успішно! Ви купили кріокамеру.");
                     }
-                    else if (choice == "4")
+                    if (choice == "4")
                     {
-                        if (player.MentalLevel >= 5) 
+                        if (player.CoachLevel >= 5)
                         {
-                            Console.WriteLine("\n[!] Максимальний рівень досягнуто."); continue;
                         }
-                        player.SpendMoney(mentalPrice);
-                        player.UpgradeMental();
-                        Console.WriteLine("\n[+] Успішно! Ви найняли психолога.");
+                        else if (player.Money >= coachPrice)
+                        {
+                            player.SpendMoney(coachPrice);
+                            player.CoachLevel++;
+                            player.TrainingBonus += 2;
+
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.WriteLine("\nВи найняли кращого персонального тренера! Шанс прокачки зріс.");
+                            Console.ResetColor();
+                        }
                     }
+
+                    Console.WriteLine("\nНатисніть будь-яку клавішу...");
+                    Console.ReadKey();
                 }
                 catch (Exception ex)
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"\nПОМИЛКА: {ex.Message}");
+                    Console.WriteLine($"\n[!] Сталася помилка в магазині: {ex.Message}");
                     Console.ResetColor();
+                    Console.ReadKey();
                 }
-
-                Console.WriteLine("\nНатисніть будь-яку клавішу...");
-                Console.ReadKey();
             }
         }
+        
     }
 }

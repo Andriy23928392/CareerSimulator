@@ -10,7 +10,9 @@ namespace CareerSimulator.Domain.Activities
     {
         League,          
         ChampionsLeague, 
-        Cup             
+        Cup,
+        NationalTeam
+        
     }
 
     public enum MatchLocation
@@ -62,10 +64,9 @@ namespace CareerSimulator.Domain.Activities
             }
 
             int baseEnergyCost = Math.Max(10, 40 - player.MatchDiscount);
-            int actualEnergyCost = player.CalculateEnergyCost(baseEnergyCost); 
+            int actualEnergyCost = player.CalculateEnergyCost(baseEnergyCost);
 
-            int winChance = 40 + (player.OverallRating / 2) + player.WinChanceBonus;
-
+            int winChance = 35 + (player.OverallRating / 4);
             Console.Clear();
             Console.WriteLine($"\n=== МАТЧ: {player.CurrentClub.Name} ({matchType.ToString().ToUpper()}) ===");
 
@@ -102,7 +103,7 @@ namespace CareerSimulator.Domain.Activities
 
             player.AddMatchThisWeek();
 
-            if (player.Morale >= 80) winChance += 10;
+            if (player.Morale >= 80) winChance += 5;
             else if (player.Morale < 30) winChance -= 10;
 
             int roll = _random.Next(1, 101);
@@ -152,7 +153,7 @@ namespace CareerSimulator.Domain.Activities
                 case Position.Forward:
                     if (isWin)
                     {
-                        if (player.Attributes.Shooting > 85) goals = _random.Next(2, 5); // Хет-трики для топів
+                        if (player.Attributes.Shooting > 85) goals = _random.Next(2, 5);
                         else if (player.Attributes.Shooting > 70) goals = _random.Next(1, 3);
                         else goals = _random.Next(1, 2);
                     }
@@ -173,9 +174,6 @@ namespace CareerSimulator.Domain.Activities
                 player.ChangeMorale(10);
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"ПЕРЕМОГА! {positionText}");
-                int earned = _random.Next(80, 150);
-                player.EarnMoney(earned);
-                Console.WriteLine($"💰 Зароблено за матч: {earned}$");
                 player.ChangeCoachTrust(5);
             }
             else if (isDraw)
@@ -183,9 +181,6 @@ namespace CareerSimulator.Domain.Activities
                 player.ChangeMorale(-5);
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"НІЧИЯ. {positionText}");
-                int earned = _random.Next(30, 80);
-                player.EarnMoney(earned);
-                Console.WriteLine($"💰 Зароблено за матч: {earned}$");
                 player.ChangeCoachTrust(0);
             }
             else

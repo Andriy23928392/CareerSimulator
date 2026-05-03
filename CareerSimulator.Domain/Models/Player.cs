@@ -44,7 +44,7 @@ namespace CareerSimulator.Domain.Models
         public string SponsorName { get; private set; } = "Немає";
         public PlayerStats Stats { get; private set; } = new PlayerStats();
         public PlayerUpgrades Upgrades { get; private set; } = new PlayerUpgrades();
-
+        public DateTime BirthDate { get; set; }
         public int MaxEnergy => 100 + Upgrades.MaxEnergyBonus;
 
         public int TrainingDiscount => Upgrades.TrainingDiscount;
@@ -54,7 +54,8 @@ namespace CareerSimulator.Domain.Models
         public int VillaLevel => Upgrades.VillaLevel;
         public int GearLevel => Upgrades.GearLevel;
         public int CryoLevel => Upgrades.CryoLevel;
-        public int MentalLevel => Upgrades.MentalLevel;
+        public int CoachLevel { get; set; }
+        public int TrainingBonus { get; set; }
         public int CoachTrust { get; private set; } = 50;
 
         public bool IsInjured => WeeksInjured > 0;
@@ -75,7 +76,16 @@ namespace CareerSimulator.Domain.Models
             PlayerPosition = position;
             Energy = 100;
             Money = 500m;
-            Age = 16;
+            Random rnd = new Random();
+            DateTime start = new DateTime(2008, 9, 1);
+            int range = (new DateTime(2009, 8, 31) - start).Days;
+            BirthDate = start.AddDays(rnd.Next(range));
+
+            DateTime gameStart = new DateTime(2025, 9, 1);
+            int calculatedAge = gameStart.Year - BirthDate.Year;
+            if (gameStart < BirthDate.AddYears(calculatedAge)) calculatedAge--;
+
+            Age = calculatedAge;
             CurrentClub = new Club("ФК Збірна Університету", 0m, 10);
 
         }

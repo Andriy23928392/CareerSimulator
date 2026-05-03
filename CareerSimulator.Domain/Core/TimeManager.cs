@@ -30,6 +30,50 @@ namespace CareerSimulator.Domain.Core
             }
         }
 
+        public (CareerSimulator.Domain.Activities.MatchType, CareerSimulator.Domain.Activities.MatchLocation) GetNextMatchDetails()
+        {
+            int month = CurrentDate.Month;
+            int playerRating = _player.OverallRating;
+
+            if (playerRating >= 75)
+            {
+                if (CurrentDate.Year % 2 == 0 && ((month == 6 && CurrentDate.Day >= 15) || (month == 7 && CurrentDate.Day <= 15)))
+                {
+                    if (_random.Next(1, 101) <= 50)
+                        return (CareerSimulator.Domain.Activities.MatchType.NationalTeam, CareerSimulator.Domain.Activities.MatchLocation.Neutral);
+                }
+                else if (month == 9 || month == 10 || month == 11 || month == 3)
+                {
+                    if (_random.Next(1, 101) <= 30)
+                    {
+                        CareerSimulator.Domain.Activities.MatchLocation loc = (CareerSimulator.Domain.Activities.MatchLocation)_random.Next(0, 2);
+                        return (CareerSimulator.Domain.Activities.MatchType.NationalTeam, loc);
+                    }
+                }
+            }
+
+            if (_player.Stats.SeasonLeagueMatches >= 38)
+                return (CareerSimulator.Domain.Activities.MatchType.Cup, CareerSimulator.Domain.Activities.MatchLocation.Neutral);
+
+            if (playerRating >= 75 && month != 1 && month != 6 && month != 7 && month != 8)
+            {
+                if (_random.Next(1, 101) <= 25)
+                {
+                    CareerSimulator.Domain.Activities.MatchLocation loc = (CareerSimulator.Domain.Activities.MatchLocation)_random.Next(0, 2);
+                    return (CareerSimulator.Domain.Activities.MatchType.ChampionsLeague, loc);
+                }
+            }
+
+            if (month == 1 || month == 2 || month == 5)
+            {
+                if (_random.Next(1, 101) <= 20)
+                    return (CareerSimulator.Domain.Activities.MatchType.Cup, CareerSimulator.Domain.Activities.MatchLocation.Neutral);
+            }
+
+            CareerSimulator.Domain.Activities.MatchLocation defaultLoc = (CareerSimulator.Domain.Activities.MatchLocation)_random.Next(0, 2);
+            return (CareerSimulator.Domain.Activities.MatchType.League, defaultLoc);
+        }
+
         public void AdvanceTime()
         {
             DateTime oldDate = CurrentDate;
@@ -71,28 +115,78 @@ namespace CareerSimulator.Domain.Core
                 Console.ReadKey();
             }
 
-            if (CurrentDate.Year > oldDate.Year)
+            int expectedAge = CurrentDate.Year - _player.BirthDate.Year;
+            if (CurrentDate < _player.BirthDate.AddYears(expectedAge)) expectedAge--;
+
+            if (expectedAge > _player.Age)
             {
-                _player.SetAge(_player.Age + 1);
-
-                Console.ForegroundColor = ConsoleColor.Cyan;
-                Console.WriteLine("\n==================================================");
-                Console.WriteLine($"🏆 СЕЗОН {oldDate.Year} ЗАВЕРШЕНО! ПОЧАТОК НОВОГО СЕЗОНУ.");
-                Console.WriteLine("==================================================");
-
+                _player.SetAge(expectedAge);
                 Console.ForegroundColor = ConsoleColor.Magenta;
-                Console.WriteLine($"🎂 З днем народження! Вам тепер {_player.Age} років.");
+                Console.WriteLine($"\n🎂 З ДНЕМ НАРОДЖЕННЯ!");
+                Console.WriteLine($"Сьогодні {_player.BirthDate:dd.MM}, вам виповнюється {_player.Age} років.");
                 Console.ResetColor();
-
-                // Обнуляємо сезонну статистику
-                _player.Stats.ResetSeasonStats();
-                Console.WriteLine("[!] Сезонну статистику обнулено. Час підкорювати нові вершини!");
 
                 if (_player.Age >= _player.Stats.RetirementAge)
                 {
                     EndCareer();
                     return;
                 }
+            }
+
+            if (CurrentDate.Month == 8 && oldDate.Month == 7)
+            {
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\n==================================================");
+                Console.WriteLine($"🏆 СЕЗОН {CurrentDate.Year - 1}/{CurrentDate.Year} ЗАВЕРШЕНО! ПІДБИТТЯ ПІДСУМКІВ.");
+                Console.WriteLine("==================================================");
+
+                int seasonScore = 0;
+                if (_player.PlayerPosition == Position.Forward || _player.PlayerPosition == Position.Midfielder)
+                {
+                    seasonScore = (_player.Stats.SeasonGoals * 2) + _player.Stats.SeasonAssists + _player.OverallRating;
+                }
+                else
+                {
+                    seasonScore = (_player.Stats.SeasonCleanSheets * 3) + _player.OverallRating;
+                }
+
+                int clubModifier = _player.OverallRating >= 85 ? 20 : 0;
+                seasonScore += clubModifier;
+
+                if (seasonScore >= 180)
+                {
+                    _player.Stats.BallonDorAwards++;
+                    _player.ChangeMorale(50);
+                    _player.ChangeCoachTrust(50);
+                    _player.EarnMoney(100000);
+                    _player.ChangeReputation(1000);
+
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    Console.WriteLine("\n🌟🌟🌟 УВАГА! ВЕСЬ ФУТБОЛЬНИЙ СВІТ ЗАМЕР... 🌟🌟🌟");
+                    Console.WriteLine($"За феноменальну гру в цьому сезоні...");
+                    Console.WriteLine($"ГРАВЕЦЬ {_player.Name.ToUpper()} ОТРИМУЄ ЗОЛОТИЙ М'ЯЧ!");
+                    Console.WriteLine($"Це ваш {_player.Stats.BallonDorAwards}-й Золотий м'яч у кар'єрі!");
+                    Console.WriteLine("Бонус: 100,000$ | +1000 Слави | Мораль і Довіра на максимумі!");
+                    Console.ResetColor();
+                }
+                else if (seasonScore >= 130)
+                {
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("\n👏 Ви провели блискучий сезон і потрапили в топ-10 номінантів на Золотий м'яч!");
+                    Console.WriteLine("Але нагороду цього року забрав інший гравець. Працюйте далі!");
+                    Console.ResetColor();
+                }
+                else
+                {
+                    Console.WriteLine("\n📊 Сезон завершено. До Золотого м'яча ще треба рости, але все попереду.");
+                }
+
+                Console.WriteLine("\nНатисніть будь-яку клавішу, щоб перейти до нового сезону...");
+                Console.ReadKey();
+
+                _player.Stats.ResetSeasonStats();
+                Console.WriteLine("\n[!] Сезонну статистику обнулено. Починаємо з чистого аркуша!");
             }
 
             if (_player.Age >= 32 && CurrentDate.Month != oldDate.Month)
@@ -116,22 +210,7 @@ namespace CareerSimulator.Domain.Core
             var offer = CareerSimulator.Domain.Logic.TransferManager.CheckForTransferOffers(_player, CurrentDate);
             if (offer != null)
             {
-                Console.ForegroundColor = ConsoleColor.Yellow;
-                Console.WriteLine("\n=============================================");
-                Console.WriteLine($"🚨 ТРАНСФЕРНА ПРОПОЗИЦІЯ! Клуб {offer.Name} зацікавився вами!");
-                Console.WriteLine($"Пропонована зарплата: {offer.WeeklySalary}$ на тиждень.");
-                Console.WriteLine("=============================================");
-                Console.WriteLine("1. Підписати контракт");
-                Console.WriteLine("2. Відмовитись і залишитись");
-                Console.Write("Ваш вибір: ");
-
-                string transferChoice = Console.ReadLine() ?? "";
-                if (transferChoice == "1")
-                {
-                    _player.SignContract(offer);
-                    Console.WriteLine($"\nВітаємо! Ви офіційно стали гравцем {offer.Name}!");
-                }
-                Console.ResetColor();
+                HandleTransferOffer(offer);
             }
         }
 
@@ -179,6 +258,8 @@ namespace CareerSimulator.Domain.Core
             {
                 if (!_player.IsInjured)
                 {
+                    _player.AddTrainingThisWeek();
+
                     int baseMatchCost = Math.Max(10, 40 - _player.MatchDiscount);
                     int actualMatchCost = _player.CalculateEnergyCost(baseMatchCost);
 
@@ -188,8 +269,8 @@ namespace CareerSimulator.Domain.Core
                         _player.AddMatchThisWeek();
                         totalMatchesSimulated++;
 
-                        int winChance = 40 + (_player.OverallRating / 2) + _player.WinChanceBonus;
-                        if (_player.Morale >= 80) winChance += 10;
+                        int winChance = 40 + (_player.OverallRating / 2);
+                        if (_player.Morale >= 80) winChance += 5;
                         else if (_player.Morale < 30) winChance -= 10;
 
                         int roll = _random.Next(1, 101);
@@ -199,15 +280,26 @@ namespace CareerSimulator.Domain.Core
                         int goals = 0, assists = 0, cleanSheets = 0;
                         if (isWin)
                         {
-                            if (_player.PlayerPosition == Position.Forward) goals = _random.Next(1, 3);
-                            if (_player.PlayerPosition == Position.Midfielder) { goals = _random.Next(0, 2); assists = _random.Next(1, 3); }
-                            if (_player.PlayerPosition == Position.Defender || _player.PlayerPosition == Position.Goalkeeper) cleanSheets = 1;
+                            if (_player.PlayerPosition == Position.Forward)
+                            {
+                                goals = _random.Next(0, 100) < 60 ? 1 : (_random.Next(0, 100) < 20 ? 2 : 0);
+                                if (_random.Next(0, 100) < 30) assists = 1;
+                            }
+                            if (_player.PlayerPosition == Position.Midfielder)
+                            {
+                                if (_random.Next(0, 100) < 30) goals = 1;
+                                assists = _random.Next(0, 100) < 50 ? 1 : (_random.Next(0, 100) < 15 ? 2 : 0);
+                            }
+                            if (_player.PlayerPosition == Position.Defender || _player.PlayerPosition == Position.Goalkeeper)
+                            {
+                                if (_random.Next(0, 100) < 40) cleanSheets = 1;
+                            }
                         }
 
                         _player.Stats.RecordMatchStats(goals, assists, cleanSheets, 0);
 
-                        if (isWin) { _player.ChangeMorale(10); _player.EarnMoney(100); }
-                        else if (isDraw) { _player.ChangeMorale(-5); _player.EarnMoney(50); }
+                        if (isWin) { _player.ChangeMorale(10); }
+                        else if (isDraw) { _player.ChangeMorale(-5); }
                         else { _player.ChangeMorale(-15); }
 
                         if (_random.Next(1, 101) <= 4)
@@ -227,25 +319,25 @@ namespace CareerSimulator.Domain.Core
                         if (_player.PlayerPosition == Position.Goalkeeper)
                         {
                             int statToTrain = _random.Next(1, 7);
-                            if (statToTrain == 1) _player.Attributes.TryImprove(ref _player.Attributes.GK_Diving);
-                            else if (statToTrain == 2) _player.Attributes.TryImprove(ref _player.Attributes.GK_Reflexes);
-                            else if (statToTrain == 3) _player.Attributes.TryImprove(ref _player.Attributes.GK_Positioning);
-                            else if (statToTrain == 4) _player.Attributes.TryImprove(ref _player.Attributes.GK_Handling);
-                            else if (statToTrain == 5) _player.Attributes.TryImprove(ref _player.Attributes.GK_Kicking);
-                            else _player.Attributes.TryImprove(ref _player.Attributes.GK_Speed);
+                            if (statToTrain == 1) _player.Attributes.TryImprove(ref _player.Attributes.GK_Diving, bonus: _player.TrainingBonus);
+                            else if (statToTrain == 2) _player.Attributes.TryImprove(ref _player.Attributes.GK_Reflexes, bonus: _player.TrainingBonus);
+                            else if (statToTrain == 3) _player.Attributes.TryImprove(ref _player.Attributes.GK_Positioning, bonus: _player.TrainingBonus);
+                            else if (statToTrain == 4) _player.Attributes.TryImprove(ref _player.Attributes.GK_Handling, bonus: _player.TrainingBonus);
+                            else if (statToTrain == 5) _player.Attributes.TryImprove(ref _player.Attributes.GK_Kicking, bonus: _player.TrainingBonus);
+                            else _player.Attributes.TryImprove(ref _player.Attributes.GK_Speed, bonus: _player.TrainingBonus);
                         }
                         else
                         {
                             int statToTrain = _random.Next(1, 7);
-                            if (statToTrain == 1) _player.Attributes.TryImprove(ref _player.Attributes.Pace);
-                            else if (statToTrain == 2) _player.Attributes.TryImprove(ref _player.Attributes.Shooting);
-                            else if (statToTrain == 3) _player.Attributes.TryImprove(ref _player.Attributes.Passing);
-                            else if (statToTrain == 4) _player.Attributes.TryImprove(ref _player.Attributes.Physical);
-                            else if (statToTrain == 5) _player.Attributes.TryImprove(ref _player.Attributes.Dribbling);
+                            if (statToTrain == 1) _player.Attributes.TryImprove(ref _player.Attributes.Pace, bonus: _player.TrainingBonus);
+                            else if (statToTrain == 2) _player.Attributes.TryImprove(ref _player.Attributes.Shooting, bonus: _player.TrainingBonus);
+                            else if (statToTrain == 3) _player.Attributes.TryImprove(ref _player.Attributes.Passing, bonus: _player.TrainingBonus);
+                            else if (statToTrain == 4) _player.Attributes.TryImprove(ref _player.Attributes.Physical, bonus: _player.TrainingBonus);
+                            else if (statToTrain == 5) _player.Attributes.TryImprove(ref _player.Attributes.Dribbling, bonus: _player.TrainingBonus);
                             else
                             {
                                 int defLimit = _player.PlayerPosition == Position.Forward ? 50 : (_player.PlayerPosition == Position.Midfielder ? 70 : 99);
-                                _player.Attributes.TryImprove(ref _player.Attributes.Defending, defLimit);
+                                _player.Attributes.TryImprove(ref _player.Attributes.Defending, defLimit, bonus: _player.TrainingBonus);
                             }
                         }
                     }
@@ -264,33 +356,26 @@ namespace CareerSimulator.Domain.Core
             Console.ResetColor();
         }
 
-        private void HandleTransferOffer(Club newClub)
+        private void HandleTransferOffer(Club offer)
         {
-            Console.BackgroundColor = ConsoleColor.DarkBlue;
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine($"\n[ТРАНСФЕРНА ПРОПОЗИЦІЯ!]");
-            Console.ResetColor();
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine("\n=============================================");
+            Console.WriteLine($"🚨 ТРАНСФЕРНА ПРОПОЗИЦІЯ! Клуб {offer.Name} зацікавився вами!");
+            Console.WriteLine($"Пропонована зарплата: {offer.WeeklySalary}$ на тиждень.");
+            Console.WriteLine("=============================================");
+            Console.WriteLine("1. Підписати контракт");
+            Console.WriteLine("2. Відмовитись і залишитись");
+            Console.Write("Ваш вибір: ");
 
-            Console.WriteLine($"Клуб {newClub.Name} хоче підписати вас!");
-            Console.WriteLine($"Запропонована зарплата: {newClub.WeeklySalary}$ на тиждень.");
-            Console.Write("Прийняти пропозицію? (введіть 'так', '1' або '+'): ");
-
-            string response = Console.ReadLine()?.Trim().ToLower() ?? "";
-
-            if (response == "так" || response == "1" || response == "+" || response.StartsWith("т") || response.StartsWith("y"))
+            string transferChoice = Console.ReadLine() ?? "";
+            if (transferChoice == "1")
             {
-                _player.SignContract(newClub);
+                _player.SignContract(offer);
                 _lastTransferDate = CurrentDate;
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\nГРАЦІЯ! Ви підписали контракт із клубом {newClub.Name}!");
-                Console.ResetColor();
-
+                Console.WriteLine($"\nВітаємо! Ви офіційно стали гравцем {offer.Name}!");
                 CareerSimulator.Domain.Infrastructure.SaveManager.SaveGame(_player, this);
             }
-            else
-            {
-                Console.WriteLine("Ви відхилили пропозицію.");
-            }
+            Console.ResetColor();
         }
 
         public void SetDate(DateTime date) { CurrentDate = date; }

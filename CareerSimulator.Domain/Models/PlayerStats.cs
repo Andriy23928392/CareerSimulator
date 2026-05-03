@@ -4,6 +4,7 @@ namespace CareerSimulator.Domain.Models
 {
     public class PlayerStats
     {
+        public int SeasonLeagueMatches { get; set; }
         public int TotalMatches { get; private set; } = 0;
         public int RetirementAge { get; private set; }
         public int SeasonMatches { get; set; }
@@ -16,6 +17,7 @@ namespace CareerSimulator.Domain.Models
         public int TotalAssists { get; private set; } = 0;
         public int TotalCleanSheets { get; private set; } = 0;
         public int TotalPenaltiesSaved { get; private set; } = 0;
+        public int BallonDorAwards { get; set; }
 
 
         public PlayerStats()
@@ -28,6 +30,7 @@ namespace CareerSimulator.Domain.Models
             SeasonGoals = 0;
             SeasonAssists = 0;
             SeasonCleanSheets = 0;
+            SeasonLeagueMatches = 0;
         }
 
         public void RecordMatchStats(int goals, int assists, int cleanSheets, int penaltiesSaved)

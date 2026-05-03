@@ -16,8 +16,7 @@ namespace CareerSimulator.UI.Menus
 
             Console.WriteLine($"Ім'я: {player.Name}");
             Console.WriteLine($"Національність: {player.Nationality}");
-            Console.WriteLine($"Вік: {player.Age} років (Пенсія очікується у {player.Stats.RetirementAge})");
-            Console.WriteLine($"Позиція: {player.PlayerPosition}");
+            Console.WriteLine($"Вік: {player.Age} років : {player.BirthDate:dd.MM.yyyy} | Пенсія у {player.Stats.RetirementAge})"); Console.WriteLine($"Позиція: {player.PlayerPosition}");
             Console.WriteLine($"Поточний клуб: {player.CurrentClub.Name}");
             Console.WriteLine($"Зарплата: {player.CurrentClub.WeeklySalary}$ | Баланс: {player.Money}$");
 
@@ -46,7 +45,7 @@ namespace CareerSimulator.UI.Menus
             if (player.Morale >= 80)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("[КУРАЖ: +10% до перемоги]");
+                Console.WriteLine("[КУРАЖ: +5% до перемоги]");
             }
             else if (player.Morale < 30)
             {
@@ -113,8 +112,13 @@ namespace CareerSimulator.UI.Menus
 
             Console.WriteLine("\n---------------- МОДИФІКАТОРИ --------------------");
             Console.WriteLine($"Макс. Енергія: {player.MaxEnergy} | Слава: {player.Reputation}");
+            if (player.Stats.BallonDorAwards > 0)
+            {
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"🏆 Золоті м'ячі (Ballon d'Or): {player.Stats.BallonDorAwards} шт.");
+                Console.ResetColor();
+            }
             if (player.WinChanceBonus > 0) Console.WriteLine($"[+] Менталітет: +{player.WinChanceBonus}% до шансу перемоги");
-
             Console.WriteLine("\nНатисніть будь-яку клавішу для виходу...");
             Console.ReadKey();
         }

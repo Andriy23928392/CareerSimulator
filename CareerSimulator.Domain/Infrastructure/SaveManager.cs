@@ -26,6 +26,12 @@ namespace CareerSimulator.Domain.Infrastructure
         public int Reputation { get; set; }
         public int TotalMatches { get; set; }
         public int RetirementAge { get; set; }
+
+        public int TrainingBonus { get; set; }
+        public int BallonDorAwards { get; set; }
+        public int SeasonLeagueMatches { get; set; }
+        public string Nationality { get; set; } = string.Empty;
+        public DateTime BirthDate { get; set; }
     }
 
     public static class SaveManager
@@ -46,13 +52,20 @@ namespace CareerSimulator.Domain.Infrastructure
                 CurrentDate = timeManager.CurrentDate,
                 ClubName = player.CurrentClub.Name,
                 ClubSalary = player.CurrentClub.WeeklySalary,
+
                 VillaLevel = player.VillaLevel,
                 GearLevel = player.GearLevel,
                 CryoLevel = player.CryoLevel,
-                MentalLevel = player.MentalLevel,
+
                 Reputation = player.Reputation,
                 TotalMatches = player.Stats.TotalMatches,
-                RetirementAge = player.Stats.RetirementAge
+                RetirementAge = player.Stats.RetirementAge,
+
+                TrainingBonus = player.TrainingBonus,
+                BallonDorAwards = player.Stats.BallonDorAwards,
+                SeasonLeagueMatches = player.Stats.SeasonLeagueMatches,
+                Nationality = player.Nationality,
+                BirthDate = player.BirthDate
             };
 
             string json = JsonSerializer.Serialize(state, new JsonSerializerOptions { WriteIndented = true });
@@ -72,9 +85,19 @@ namespace CareerSimulator.Domain.Infrastructure
 
             Player loadedPlayer = new Player(state.PlayerName, state.PlayerPosition);
             loadedPlayer.LoadState(
-                state.Age, state.Energy, state.Money, state.OverallRating,state.ClubName, state.ClubSalary,
-                state.GymLevel, state.VillaLevel, state.GearLevel, state.CryoLevel, state.MentalLevel,state.Reputation, state.TotalMatches, state.RetirementAge
-                );
+                state.Age, state.Energy, state.Money, state.OverallRating, state.ClubName, state.ClubSalary,
+                state.GymLevel, state.VillaLevel, state.GearLevel, state.CryoLevel, state.MentalLevel, state.Reputation, state.TotalMatches, state.RetirementAge
+            );
+
+            loadedPlayer.TrainingBonus = state.TrainingBonus;
+            loadedPlayer.Stats.BallonDorAwards = state.BallonDorAwards;
+            loadedPlayer.Stats.SeasonLeagueMatches = state.SeasonLeagueMatches;
+
+            if (!string.IsNullOrEmpty(state.Nationality))
+                loadedPlayer.Nationality = state.Nationality;
+
+            if (state.BirthDate != DateTime.MinValue)
+                loadedPlayer.BirthDate = state.BirthDate;
 
             TimeManager loadedTime = new TimeManager(loadedPlayer);
             loadedTime.SetDate(state.CurrentDate);

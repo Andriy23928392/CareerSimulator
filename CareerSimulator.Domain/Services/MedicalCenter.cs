@@ -13,7 +13,7 @@ namespace CareerSimulator.Domain.Services
             if (player.IsInjured) return;
 
             // Шанс травмуватись вищий у матчі, ніж на тренуванні
-            int baseChance = isMatch ? 5 : 2; 
+            int baseChance = isMatch ? 2 : 1; 
 
             if (_random.Next(1, 101) <= baseChance)
             {
@@ -46,10 +46,10 @@ namespace CareerSimulator.Domain.Services
                 }
                 else 
                 {
-                    // КАТАСТРОФА: "Хрести" (3%)
+                    // "Хрести" (3%)
                     name = "Розрив хрестоподібних зв'язок";
-                    weeks = _random.Next(24, 36); // Близько 6-8 місяців без футболу
-                    moraleDrop = 70; // Миттєва депресія
+                    weeks = _random.Next(24, 36); 
+                    moraleDrop = 70; 
                 }
 
                 player.SufferInjury(name, weeks);

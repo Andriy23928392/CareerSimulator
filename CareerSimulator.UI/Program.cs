@@ -122,11 +122,30 @@ namespace CareerSimulator.UI
                         break;
                     case "3":
                         if (myPlayer.IsInjured) { Console.WriteLine("Ви травмовані! Треба відпочивати."); break; }
-                        Random rnd = new Random();
-                        CareerSimulator.Domain.Activities.MatchLocation randomLocation = (CareerSimulator.Domain.Activities.MatchLocation)rnd.Next(0, 2);
-                        match.Execute(myPlayer, gameTime, CareerSimulator.Domain.Activities.MatchType.League, randomLocation);
-                        CareerSimulator.Domain.Services.MedicalCenter.CheckForInjury(myPlayer, false);
-                        break; ;
+
+                        var matchDetails = gameTime.GetNextMatchDetails();
+                        var matchType = matchDetails.Item1;
+                        var matchLoc = matchDetails.Item2;
+
+                        if (matchType == CareerSimulator.Domain.Activities.MatchType.League && myPlayer.Stats.SeasonLeagueMatches >= 38)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            Console.WriteLine("\n[КАЛЕНДАР] Сезон у лізі завершено (зіграно 38 матчів)!");
+                            Console.WriteLine("Чекайте на фінали кубків або йдіть у відпустку (Відпочинок) до кінця сезону.");
+                            Console.ResetColor();
+
+                            break;
+                        }
+
+                        match.Execute(myPlayer, gameTime, matchType, matchLoc);
+                        
+                        if (matchType == CareerSimulator.Domain.Activities.MatchType.League)
+                        {
+                            myPlayer.Stats.SeasonLeagueMatches++;
+                        }
+
+                        CareerSimulator.Domain.Services.MedicalCenter.CheckForInjury(myPlayer, true);
+                        break;
                     case "4":
                         StoreMenu.OpenStore(myPlayer);
                         break;

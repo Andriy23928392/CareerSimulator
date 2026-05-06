@@ -75,7 +75,8 @@ namespace CareerSimulator.UI
                 int actualMatchCost = myPlayer.CalculateEnergyCost(baseMatchCost);
 
                 Console.WriteLine("\n==============================");
-                Console.WriteLine($"Статус: {myPlayer.Name} ({myPlayer.Age} років) | {myPlayer.PlayerPosition} | {myPlayer.CurrentClub.Name}"); Console.WriteLine($"Енергія: {myPlayer.Energy} | Гроші: {myPlayer.Money}$ | Рейтинг: {myPlayer.OverallRating}");
+                Console.WriteLine($"Статус: {myPlayer.Name} ({myPlayer.Age} років) | {myPlayer.PlayerPosition} | {myPlayer.CurrentClub.Name}");
+                Console.WriteLine($"Енергія: {myPlayer.Energy} | Гроші: {myPlayer.Money}$ | Рейтинг: {myPlayer.OverallRating}");
                 Console.WriteLine($"Довіра тренера: {myPlayer.CoachTrust}/100");
                 Console.WriteLine($"Дата: {gameTime.CurrentDate.ToString("dd.MM.yyyy")}");
                 Console.WriteLine("==============================");
@@ -98,13 +99,14 @@ namespace CareerSimulator.UI
                 Console.WriteLine($"1. Інтенсивне тренування (-{actualTrainingCost} енергії)");
                 Console.WriteLine($"2. Відпочинок вдома (Відновлює до {myPlayer.MaxEnergy})");
                 Console.WriteLine($"3. Зіграти матч (-{actualMatchCost} енергії)");
-                Console.WriteLine("4. Відвідати магазин");
+                Console.WriteLine("4. Магазин");
                 Console.WriteLine("5. Модифікатори");
                 Console.WriteLine("6. Благодійний фонд");
                 Console.WriteLine("7. Рекламні контракти");
                 Console.WriteLine("8. Профіль гравця");
                 Console.WriteLine("9. Просимулювати РІК");
                 Console.WriteLine("10. Зберегти гру");
+                Console.WriteLine("11. Агентство");
                 Console.WriteLine("0. Вийти з гри");
                 Console.Write("Ваш вибір: ");
 
@@ -133,12 +135,11 @@ namespace CareerSimulator.UI
                             Console.WriteLine("\n[КАЛЕНДАР] Сезон у лізі завершено (зіграно 38 матчів)!");
                             Console.WriteLine("Чекайте на фінали кубків або йдіть у відпустку (Відпочинок) до кінця сезону.");
                             Console.ResetColor();
-
                             break;
                         }
 
                         match.Execute(myPlayer, gameTime, matchType, matchLoc);
-                        
+
                         if (matchType == CareerSimulator.Domain.Activities.MatchType.League)
                         {
                             myPlayer.Stats.SeasonLeagueMatches++;
@@ -150,7 +151,7 @@ namespace CareerSimulator.UI
                         StoreMenu.OpenStore(myPlayer);
                         break;
                     case "5":
-                        StoreMenu.OpenVIPStore(myPlayer); 
+                        StoreMenu.OpenVIPStore(myPlayer);
                         break;
                     case "6":
                         SocialMenu.OpenCharity(myPlayer);
@@ -166,6 +167,9 @@ namespace CareerSimulator.UI
                         break;
                     case "10":
                         CareerSimulator.Domain.Infrastructure.SaveManager.SaveGame(myPlayer, gameTime);
+                        break;
+                    case "11":
+                        CareerSimulator.Domain.Logic.TransferManager.OpenAgency(myPlayer, gameTime);
                         break;
                     case "0":
                         isRunning = false;

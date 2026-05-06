@@ -11,12 +11,16 @@ namespace CareerSimulator.Domain.Models
         public int SeasonGoals { get; set; }
         public int SeasonAssists { get; set; }
         public int SeasonCleanSheets { get; set; }
+        public int SeasonWins { get; set; }
+        public int SeasonDraws { get; set; }
+        public int SeasonLosses { get; set; }
+        public List<string> Trophies { get; set; } = new List<string>();
 
-        // --- СТАТИСТИКА ---
-        public int TotalGoals { get; private set; } = 0;
-        public int TotalAssists { get; private set; } = 0;
-        public int TotalCleanSheets { get; private set; } = 0;
-        public int TotalPenaltiesSaved { get; private set; } = 0;
+
+        public int TotalGoals { get; set; } = 0;
+        public int TotalAssists { get; set; } = 0;
+        public int TotalCleanSheets { get; set; } = 0;
+        public int TotalPenaltiesSaved { get; set; } = 0;
         public int BallonDorAwards { get; set; }
 
 

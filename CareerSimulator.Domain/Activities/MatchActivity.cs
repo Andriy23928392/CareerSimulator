@@ -215,6 +215,133 @@ namespace CareerSimulator.Domain.Activities
                 if ((Console.ReadLine() ?? "2") == "1") CareerSimulator.Domain.Events.EventManager.TriggerPostMatchInterview(player, isWin, isDraw);
             }
             MedicalCenter.CheckForInjury(player, true);
+
+            Random random = new Random();
+            if (random.Next(1, 101) <= 25 && (player.PlayerPosition == Position.Forward || player.PlayerPosition == Position.Midfielder || player.PlayerPosition == Position.Goalkeeper))
+            {
+                int matchMinute = random.Next(70, 96);
+                string minuteText = matchMinute > 90 ? $"90+{matchMinute - 90}" : matchMinute.ToString();
+
+                Console.Clear();
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\n==================================================");
+                Console.WriteLine("ПЕНАЛЬТІ!");
+                Console.WriteLine("==================================================");
+                Console.ResetColor();
+
+                Console.WriteLine($"\n{minuteText}-а хвилина матчу! Рахунок рівний. Суддя вказує на позначку!");
+
+                if (player.PlayerPosition != Position.Goalkeeper)
+                {
+                    Console.WriteLine($"{player.Name} бере м'яч. Стадіон завмер...\n");
+                    Console.WriteLine("Куди будете бити?");
+                    Console.WriteLine("1. На силу в лівий кут");
+                    Console.WriteLine("2. На точність у правий кут");
+                    Console.WriteLine("3. 'Паненка' по центру");
+                    Console.Write("Ваш вибір (1/2/3): ");
+
+                    string penaltyChoice = Console.ReadLine() ?? "";
+                    bool isGoal = false;
+                    int gkDive = random.Next(1, 4);
+
+                    Console.WriteLine("\nРозбіг... Удар!");
+                    System.Threading.Thread.Sleep(1500);
+
+                    if (penaltyChoice == "1")
+                    {
+                        if (gkDive == 1) { isGoal = player.Attributes.Physical > random.Next(50, 95); Console.WriteLine(isGoal ? "Голкіпер вгадав кут, але удар був занадто потужним! ГОЛ!" : "Голкіпер вгадав кут і відбив цей потужний удар!"); }
+                        else { isGoal = true; Console.WriteLine("Голкіпер стрибнув в інший кут! Впевнений ГОЛ!"); }
+                    }
+                    else if (penaltyChoice == "2")
+                    {
+                        if (gkDive == 2) { isGoal = player.Attributes.Shooting > random.Next(60, 95); Console.WriteLine(isGoal ? "Ідеальна точність! М'яч від стійки залітає у ворота! ГОЛ!" : "Воротар дотягнувся кінчиками пальців! Сейв!"); }
+                        else { isGoal = player.Attributes.Shooting > 50; Console.WriteLine(isGoal ? "Воротар навіть не поворухнувся. ГОЛ!" : "Ой-ой... Ви перехвилювалися і не влучили по воротах!"); }
+                    }
+                    else if (penaltyChoice == "3")
+                    {
+                        if (gkDive == 3) { isGoal = false; Console.WriteLine("Який сором! Воротар залишився по центру і просто забрав м'яч до рук..."); }
+                        else { isGoal = true; Console.WriteLine("Шедевр! Воротар полетів у кут, а м'яч елегантно опустився по центру! ГООООЛ!"); }
+                    }
+                    else { Console.WriteLine("Ви занадто довго думали, і суддя дав жовту картку за затягування часу."); }
+
+                    if (isGoal)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("\n[+] Неймовірні емоції! Ви приносите команді користь.");
+                        player.ChangeMorale(15); player.ChangeCoachTrust(10);
+                        player.Stats.SeasonGoals++;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\n[-] Фанати розчаровані. Ви підвели команду...");
+                        player.ChangeMorale(-15); player.ChangeCoachTrust(-10);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Опонент встановлює м'яч на позначку. Ви нервово стрибаєте на лінії воріт...\n");
+                    Console.WriteLine("Куди будете стрибати?");
+                    Console.WriteLine("1. У лівий кут (Залежить від GK Diving)");
+                    Console.WriteLine("2. У правий кут (Залежить від GK Diving)");
+                    Console.WriteLine("3. Залишитись по центру (Залежить від GK Reflexes)");
+                    Console.Write("Ваш вибір (1/2/3): ");
+
+                    string gkChoice = Console.ReadLine() ?? "";
+                    bool isSaved = false;
+
+                    int strikerShot = random.Next(1, 101) <= 15 ? 4 : random.Next(1, 4);
+
+                    Console.WriteLine("\nРозбіг... Удар!");
+                    System.Threading.Thread.Sleep(1500);
+
+                    if (strikerShot == 4)
+                    {
+                        Console.WriteLine("Гравець опонента не витримав тиску і пробив вище воріт! Вам навіть не довелося вступати в гру!");
+                        isSaved = true;
+                    }
+                    else if (gkChoice == "1" || gkChoice == "2" || gkChoice == "3")
+                    {
+                        if (gkChoice == strikerShot.ToString())
+                        {
+                            int requiredStat = gkChoice == "3" ? player.Attributes.GK_Reflexes : player.Attributes.GK_Diving;
+                            if (requiredStat > random.Next(50, 95))
+                            {
+                                isSaved = true;
+                                Console.WriteLine("ФАНТАСТИЧНИЙ СЕЙВ! Ви витягуєте мертвого м'яча кінчиками рукавиць!");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Ви вгадали напрямок, але удар був просто ідеальним... ГОЛ.");
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Ви кинулися в інший кут, а м'яч спокійно закотився у сітку... ГОЛ.");
+                        }
+                    }
+                    else { Console.WriteLine("Ви розгубилися на лінії і просто подивилися, як залітає гол."); }
+
+                    if (isSaved)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("\n[+] ВИ ГЕРОЙ МАТЧУ! Трибуни скандують ваше ім'я!");
+                        player.ChangeMorale(20); player.ChangeCoachTrust(15);
+                        player.Stats.SeasonCleanSheets++;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("\n[-] Прикрий пропущений м'яч. Мораль команди падає...");
+                        player.ChangeMorale(-10); player.ChangeCoachTrust(-5);
+                    }
+                }
+
+                Console.ResetColor();
+                Console.WriteLine("\nНатисніть будь-яку клавішу для продовження...");
+                Console.ReadKey();
+            }
+            
+            }
         }
     }
-}
